@@ -12,7 +12,7 @@ namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
     /// This object uses custom property editors for collections.
     /// </summary>
     [DomainComponent]
-    public class TestCollectionsNonPersistentCustom : INotifyPropertyChanged
+    public class TestCollectionsNonPersistentCustom : NonPersistentBaseObject
     {
         private string _testName;
         private string _description;
@@ -104,22 +104,6 @@ namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
             set => SetPropertyValue(ref _detailItems, value);
         }
 
-        #region INotifyPropertyChanged implementation
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void SetPropertyValue<T>(ref T field, T value, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
-        {
-            if (!Equals(field, value))
-            {
-                field = value;
-                OnPropertyChanged(propertyName);
-            }
-        }
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        #endregion
+        // INotifyPropertyChanged implementation is inherited from NonPersistentBaseObject
     }
 }

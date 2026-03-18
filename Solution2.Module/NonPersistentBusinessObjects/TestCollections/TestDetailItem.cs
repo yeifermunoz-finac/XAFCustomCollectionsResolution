@@ -9,7 +9,7 @@ namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
     /// Represents a detail item in a secondary collection for testing collection rendering in XAF Web.
     /// </summary>
     [DomainComponent]
-    public class TestDetailItem : INotifyPropertyChanged
+    public class TestDetailItem : NonPersistentLiteObject
     {
         private string _description;
         private int _quantity;
@@ -57,22 +57,6 @@ namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
         /// </summary>
         public decimal Total => Quantity * UnitPrice;
 
-        #region INotifyPropertyChanged implementation
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void SetPropertyValue<T>(ref T field, T value, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
-        {
-            if (!Equals(field, value))
-            {
-                field = value;
-                OnPropertyChanged(propertyName);
-            }
-        }
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        #endregion
+        // INotifyPropertyChanged implementation is inherited from NonPersistentLiteObject
     }
 }
