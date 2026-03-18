@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <Application>
   <Options CollectionsEditMode="Edit" />
   <ViewItems>
@@ -6,4 +6,12 @@
       <RegisteredPropertyEditor PropertyType="System.Drawing.Color" EditorType="DevExpress.ExpressApp.Web.Editors.ASPx.ASPxColorPickerPropertyEditor" />
     </PropertyEditor>
   </ViewItems>
+  <Views>
+    <DetailView Id="TestCollectionsNonPersistentCustom_DetailView">
+      <Items>
+        <PropertyEditor Id="CollectionItems" PropertyEditorType="Solution2.Module.Web.Editors.TestCollectionItemsPropertyEditor" />
+        <PropertyEditor Id="DetailItems" PropertyEditorType="Solution2.Module.Web.Editors.TestDetailItemsPropertyEditor" />
+      </Items>
+    </DetailView>
+  </Views>
 </Application>

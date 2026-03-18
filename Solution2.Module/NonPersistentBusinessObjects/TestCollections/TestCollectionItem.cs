@@ -1,0 +1,83 @@
+using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
+using System;
+using System.ComponentModel;
+
+namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
+{
+    /// <summary>
+    /// Represents an item in a collection for testing collection rendering in XAF Web.
+    /// </summary>
+    [DomainComponent]
+    public class TestCollectionItem : INotifyPropertyChanged
+    {
+        private string _code;
+        private string _name;
+        private decimal _amount;
+        private DateTime _date;
+        private bool _isActive;
+
+        /// <summary>
+        /// Gets or sets the code of the collection item.
+        /// </summary>
+        public string Code
+        {
+            get => _code;
+            set => SetPropertyValue(ref _code, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the collection item.
+        /// </summary>
+        public string Name
+        {
+            get => _name;
+            set => SetPropertyValue(ref _name, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the amount.
+        /// </summary>
+        public decimal Amount
+        {
+            get => _amount;
+            set => SetPropertyValue(ref _amount, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the date.
+        /// </summary>
+        public DateTime Date
+        {
+            get => _date;
+            set => SetPropertyValue(ref _date, value);
+        }
+
+        /// <summary>
+        /// Gets or sets whether the item is active.
+        /// </summary>
+        public bool IsActive
+        {
+            get => _isActive;
+            set => SetPropertyValue(ref _isActive, value);
+        }
+
+        #region INotifyPropertyChanged implementation
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void SetPropertyValue<T>(ref T field, T value, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            if (!Equals(field, value))
+            {
+                field = value;
+                OnPropertyChanged(propertyName);
+            }
+        }
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+    }
+}
