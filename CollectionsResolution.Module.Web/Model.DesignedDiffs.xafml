@@ -7,19 +7,52 @@
     </PropertyEditor>
   </ViewItems>
   <Views>
+    <!-- Custom rendering: Apply custom property editors only to CollectionRenderingNonPersistentCustom view -->
     <DetailView Id="CollectionRenderingNonPersistentCustom_DetailView">
       <Items>
-        <PropertyEditor Id="CollectionItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.CollectionItemsPropertyEditor">
-          <MemberDetailView>
-            <DetailView Id="CollectionRenderingNonPersistentCustom_CollectionItems_ListView_DetailView">
-              <Items>
-                <PropertyEditor Id="SubItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.SubCollectionItemsPropertyEditor" />
-              </Items>
-            </DetailView>
-          </MemberDetailView>
-        </PropertyEditor>
+        <PropertyEditor Id="CollectionItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.CollectionItemsPropertyEditor" />
         <PropertyEditor Id="DetailItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.DetailItemsPropertyEditor" />
       </Items>
     </DetailView>
+    
+    <!-- Custom modal DetailView: Displayed in popup when user clicks "Details" button in CollectionItemsPropertyEditor -->
+    <!-- Uses custom property editor for SubItems nested collection -->
+    <!-- Following eFinacEnterprise pattern: When using IsNewNode="True", explicitly define ALL properties -->
+    <DetailView Id="CollectionItemNonPersistent_Custom_DetailView" ClassName="CollectionsResolution.Module.NonPersistentBusinessObjects.CollectionRendering.CollectionItemNonPersistent" IsNewNode="True">
+      <Items IsNewNode="True">
+        <PropertyEditor Id="Code" PropertyName="Code" IsNewNode="True" />
+        <PropertyEditor Id="Name" PropertyName="Name" IsNewNode="True" />
+        <PropertyEditor Id="Amount" PropertyName="Amount" IsNewNode="True" />
+        <PropertyEditor Id="Date" PropertyName="Date" IsNewNode="True" />
+        <PropertyEditor Id="IsActive" PropertyName="IsActive" IsNewNode="True" />
+        <PropertyEditor Id="SubItems" PropertyName="SubItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.SubCollectionItemsPropertyEditor" IsNewNode="True" />
+      </Items>
+      <Layout IsNewNode="True">
+        <LayoutGroup Id="Main" RelativeSize="100" IsNewNode="True">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="100" IsNewNode="True">
+            <!-- Direction="Horizontal" makes col1 and col2 appear side-by-side instead of stacked -->
+            <LayoutGroup Id="CollectionItemNonPersistent_Custom" Direction="Horizontal" RelativeSize="100" IsNewNode="True">
+              <!-- Left Column: Code, Name, Amount -->
+              <LayoutGroup Id="CollectionItemNonPersistent_Custom_col1" Direction="Vertical" RelativeSize="50" IsNewNode="True">
+                <LayoutItem Id="Code" RelativeSize="33.333333333333336" IsNewNode="True" />
+                <LayoutItem Id="Name" RelativeSize="33.333333333333336" IsNewNode="True" />
+                <LayoutItem Id="Amount" RelativeSize="33.333333333333336" IsNewNode="True" />
+              </LayoutGroup>
+              <!-- Right Column: Date, IsActive -->
+              <LayoutGroup Id="CollectionItemNonPersistent_Custom_col2" Direction="Vertical" RelativeSize="50" IsNewNode="True">
+                <LayoutItem Id="Date" RelativeSize="50" IsNewNode="True" />
+                <LayoutItem Id="IsActive" RelativeSize="50" IsNewNode="True" />
+              </LayoutGroup>
+            </LayoutGroup>
+          </LayoutGroup>
+          <!-- SubItems collection below the two-column layout -->
+          <LayoutGroup Id="SubItems_Group" RelativeSize="100" IsNewNode="True">
+            <LayoutItem Id="SubItems" RelativeSize="100" IsNewNode="True" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+
+    <!-- Default rendering: Other views use default XAF editors (no configuration needed) -->
   </Views>
 </Application>

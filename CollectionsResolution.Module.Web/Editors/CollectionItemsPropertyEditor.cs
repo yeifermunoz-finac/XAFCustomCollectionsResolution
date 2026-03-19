@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
+using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
+using CollectionsResolution.Module.NonPersistentBusinessObjects.CollectionRendering;
 
 namespace CollectionsResolution.Module.Web.Editors
 {
@@ -11,8 +13,9 @@ namespace CollectionsResolution.Module.Web.Editors
     /// for testing collection rendering in Web applications.
     /// This editor renders an ASPxGridView to display and edit the collection.
     /// Inherits from EditableCollectionPropertyEditorBase to get edit mode detection.
+    /// Registered with isDefaultEditor=false to allow view-specific assignment via XAFML.
     /// </summary>
-    [PropertyEditor(typeof(IList), "CollectionItemsPropertyEditor", false)]
+    [PropertyEditor(typeof(BindingList<CollectionItemNonPersistent>), "CollectionItemsPropertyEditor", false)]
     public class CollectionItemsPropertyEditor : EditableCollectionPropertyEditorBase
     {
         public CollectionItemsPropertyEditor(Type objectType, IModelMemberViewItem model)

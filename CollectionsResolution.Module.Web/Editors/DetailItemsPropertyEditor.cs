@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
+using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
+using CollectionsResolution.Module.NonPersistentBusinessObjects.CollectionRendering;
 
 namespace CollectionsResolution.Module.Web.Editors
 {
@@ -10,8 +12,9 @@ namespace CollectionsResolution.Module.Web.Editors
     /// Custom Property Editor to display DetailItem collection in a grid
     /// for testing collection rendering in Web applications.
     /// Inherits from EditableCollectionPropertyEditorBase to get edit mode detection.
+    /// Registered with isDefaultEditor=false to allow view-specific assignment via XAFML.
     /// </summary>
-    [PropertyEditor(typeof(IList), "DetailItemsPropertyEditor", false)]
+    [PropertyEditor(typeof(BindingList<DetailItemNonPersistent>), "DetailItemsPropertyEditor", false)]
     public class DetailItemsPropertyEditor : EditableCollectionPropertyEditorBase
     {
         public DetailItemsPropertyEditor(Type objectType, IModelMemberViewItem model)

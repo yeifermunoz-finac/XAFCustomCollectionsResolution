@@ -17,13 +17,30 @@ namespace CollectionsResolution.Module.Web.Editors
     /// Automatically enables/disables editing based on the parent DetailView's edit mode.
     /// Follows the pattern from NPXMLFormatsListPropertyEditor using postback mode.
     /// </summary>
+    /// <summary>
+    /// Event args for when user requests to show detail view of an item
+    /// </summary>
+    public class ShowDetailRequestedEventArgs : EventArgs
+    {
+        public object Item { get; set; }
+        public ShowDetailRequestedEventArgs(object item)
+        {
+            Item = item;
+        }
+    }
+
     public abstract class EditableCollectionPropertyEditorBase : ASPxPropertyEditor
     {
         protected ASPxGridView grid;
         protected Panel containerPanel;
         private IList collectionSource;
-        private bool isEditMode = false;
+        private bool? isEditMode = null;
         private GridViewCommandColumn commandColumn;
+
+        /// <summary>
+        /// Fired when user clicks the "Details" button for an item
+        /// </summary>
+        public event EventHandler<ShowDetailRequestedEventArgs> ShowDetailRequested;
 
         protected EditableCollectionPropertyEditorBase(Type objectType, IModelMemberViewItem model)
             : base(objectType, model)
@@ -32,11 +49,15 @@ namespace CollectionsResolution.Module.Web.Editors
 
         private void DetailView_ViewEditModeChanged(object sender, EventArgs e)
         {
+            isEditMode = null; // Force state re-evaluation
             UpdateEditingState();
         }
 
         protected override WebControl CreateEditModeControlCore()
         {
+            // Force state re-evaluation when a new control is created
+            isEditMode = null;
+
             containerPanel = new Panel
             {
                 ID = GetPanelId(),
@@ -67,7 +88,7 @@ namespace CollectionsResolution.Module.Web.Editors
             grid.EnableRowsCache = true;
             
             // Behavior settings
-            grid.SettingsBehavior.AllowFocusedRow = true;
+            grid.SettingsBehavior.AllowFocusedRow = false;
             grid.SettingsBehavior.AllowSelectByRowClick = false;
 
             // Paging settings - show all records
@@ -93,12 +114,21 @@ namespace CollectionsResolution.Module.Web.Editors
                 ShowDeleteButton = true,        // Show "Delete" button for each row
                 ShowUpdateButton = true,        // Show "Update" button (appears in edit mode)
                 ShowCancelButton = true,        // Show "Cancel" button (appears in edit mode)
-                Width = Unit.Pixel(150),
+                Width = Unit.Pixel(200),
                 ButtonRenderMode = GridCommandButtonRenderMode.Button,
                 Caption = "Actions",
                 VisibleIndex = 0,
                 Visible = true  // Must be visible for inline editing to work
             };
+            
+            // Add custom "Details" button to the command column
+            var detailsButton = new GridViewCommandColumnCustomButton
+            {
+                ID = "btnDetails",
+                Text = "Details"
+            };
+            commandColumn.CustomButtons.Add(detailsButton);
+            
             grid.Columns.Insert(0, commandColumn);
 
             // Wire up grid events for CRUD operations
@@ -108,6 +138,7 @@ namespace CollectionsResolution.Module.Web.Editors
             grid.RowInserting += Grid_RowInserting;
             grid.RowUpdating += Grid_RowUpdating;
             grid.RowDeleting += Grid_RowDeleting;
+            grid.CustomButtonCallback += Grid_CustomButtonCallback;
 
             // Pre-configure grid with expected data type (additional safeguard)
             // This helps ASPxGridView know what type of objects to expect
@@ -169,21 +200,44 @@ namespace CollectionsResolution.Module.Web.Editors
             UpdateEditingState();
         }
 
+        protected override void ApplyReadOnly()
+        {
+            base.ApplyReadOnly();
+            isEditMode = null; // Force state re-evaluation
+            UpdateEditingState();
+        }
+
+        protected override void SetupControl(WebControl control)
+        {
+            base.SetupControl(control);
+            isEditMode = null;
+            UpdateEditingState();
+        }
+
+        protected override void OnAllowEditChanged()
+        {
+            base.OnAllowEditChanged();
+            isEditMode = null;
+            UpdateEditingState();
+        }
+
         private void UpdateEditingState()
         {
             if (grid == null || commandColumn == null)
                 return;
 
-            // Determine if we're in edit mode
+            // Determine if we're in edit mode based on DetailView.ViewEditMode
             bool shouldEnableEditing = false;
-
+            
             if (View is DetailView detailView)
             {
-                // Check if the DetailView is in edit mode
                 shouldEnableEditing = detailView.ViewEditMode == ViewEditMode.Edit;
             }
+            
+            // Also consider AllowEdit just in case security disables it
+            shouldEnableEditing = shouldEnableEditing && AllowEdit;
 
-            // Only update if state changed
+            // Only update if state changed (null != false -> true, so it will apply on first run)
             if (isEditMode != shouldEnableEditing)
             {
                 isEditMode = shouldEnableEditing;
@@ -193,16 +247,15 @@ namespace CollectionsResolution.Module.Web.Editors
 
         private void ApplyEditingState()
         {
-            if (grid != null)
+            if (grid != null && isEditMode.HasValue)
             {
-                // Note: Command column is always visible for inline editing
-                // SettingsDataSecurity controls whether operations are allowed
+                bool editMode = isEditMode.Value;
                 
                 // Enable/disable CRUD operations based on DetailView edit mode
                 // When in view mode, grid shows but editing is disabled
-                grid.SettingsDataSecurity.AllowInsert = isEditMode;
-                grid.SettingsDataSecurity.AllowEdit = isEditMode;
-                grid.SettingsDataSecurity.AllowDelete = isEditMode;
+                grid.SettingsDataSecurity.AllowInsert = editMode;
+                grid.SettingsDataSecurity.AllowEdit = editMode;
+                grid.SettingsDataSecurity.AllowDelete = editMode;
 
                 // Make all editable columns read-only in view mode
                 foreach (GridViewColumn column in grid.Columns)
@@ -210,7 +263,7 @@ namespace CollectionsResolution.Module.Web.Editors
                     if (column is GridViewDataColumn dataColumn && column != commandColumn)
                     {
                         // Columns become read-only in view mode
-                        dataColumn.ReadOnly = !isEditMode;
+                        dataColumn.ReadOnly = !editMode;
                     }
                 }
             }
@@ -241,6 +294,44 @@ namespace CollectionsResolution.Module.Web.Editors
         {
             // Cancel editing - grid will handle reverting changes
             OnCancelRowEditing(e);
+        }
+
+        private void Grid_CustomButtonCallback(object sender, ASPxGridViewCustomButtonCallbackEventArgs e)
+        {
+            if (e.ButtonID == "btnDetails")
+            {
+                // Only show details if the row is not currently in edit/insert mode
+                // This prevents showing detail popup while user is editing inline
+                if (!grid.IsEditing && !grid.IsNewRowEditing)
+                {
+                    // Get the Oid from the row's key value
+                    var oid = grid.GetRowValues(e.VisibleIndex, "Oid");
+                    if (oid != null && PropertyValue is IList collection)
+                    {
+                        // Find the object by Oid
+                        object item = null;
+                        foreach (var obj in collection)
+                        {
+                            var oidProp = obj.GetType().GetProperty("Oid");
+                            if (oidProp != null)
+                            {
+                                var itemOid = oidProp.GetValue(obj, null);
+                                if (itemOid != null && itemOid.Equals(oid))
+                                {
+                                    item = obj;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (item != null)
+                        {
+                            // Trigger the detail view display
+                            OnShowDetailRequested(item);
+                        }
+                    }
+                }
+            }
         }
 
         private void Grid_RowInserting(object sender, DevExpress.Web.Data.ASPxDataInsertingEventArgs e)
@@ -514,6 +605,7 @@ namespace CollectionsResolution.Module.Web.Editors
                 grid.RowInserting -= Grid_RowInserting;
                 grid.RowUpdating -= Grid_RowUpdating;
                 grid.RowDeleting -= Grid_RowDeleting;
+                grid.CustomButtonCallback -= Grid_CustomButtonCallback;
 
                 if (!unwireEventsOnly)
                 {
@@ -573,6 +665,15 @@ namespace CollectionsResolution.Module.Web.Editors
         {
             // Derived classes can override to add validation
             return true;
+        }
+
+        /// <summary>
+        /// Called when user requests to show detail view of an item.
+        /// Raises the ShowDetailRequested event.
+        /// </summary>
+        protected virtual void OnShowDetailRequested(object item)
+        {
+            ShowDetailRequested?.Invoke(this, new ShowDetailRequestedEventArgs(item));
         }
 
         // Helper methods for adding columns

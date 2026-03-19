@@ -110,6 +110,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\ShowNonPersistentDetailPopupController.cs" />
     <Compile Include="Editors\EditableCollectionPropertyEditorBase.cs" />
     <Compile Include="Editors\CollectionItemsPropertyEditor.cs" />
     <Compile Include="Editors\DetailItemsPropertyEditor.cs" />
@@ -170,7 +171,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="24.2.11">
       <PrivateAssets>all</PrivateAssets>
