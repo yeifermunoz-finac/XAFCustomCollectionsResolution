@@ -88,7 +88,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\TestCollectionsController.cs" />
     <Compile Include="DatabaseUpdate\Updater.cs" />
     <Compile Include="Module.cs">
       <SubType>Component</SubType>
@@ -99,6 +98,7 @@
     <Compile Include="NonPersistentBusinessObjects\TestCollections\TestCollectionItem.cs" />
     <Compile Include="NonPersistentBusinessObjects\TestCollections\TestCollectionsNonPersistentDefault.cs" />
     <Compile Include="NonPersistentBusinessObjects\TestCollections\TestCollectionsNonPersistentCustom.cs" />
+    <Compile Include="NonPersistentBusinessObjects\TestCollections\TestCollectionsStorageAdapter.cs" />
     <Compile Include="NonPersistentBusinessObjects\TestCollections\TestDetailItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

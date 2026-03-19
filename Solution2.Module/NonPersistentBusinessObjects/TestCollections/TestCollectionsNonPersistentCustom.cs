@@ -2,7 +2,6 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
@@ -12,7 +11,7 @@ namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
     /// This object uses custom property editors for collections.
     /// </summary>
     [DomainComponent]
-    public class TestCollectionsNonPersistentCustom : NonPersistentBaseObject
+    public class TestCollectionsNonPersistentCustom : NonPersistentLiteObject
     {
         private string _testName;
         private string _description;
@@ -36,7 +35,7 @@ namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
         public string TestName
         {
             get => _testName;
-            set => SetPropertyValue(ref _testName, value);
+            set => SetPropertyValue(ref _testName, value, nameof(TestName));
         }
 
         /// <summary>
@@ -45,7 +44,7 @@ namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
         public string Description
         {
             get => _description;
-            set => SetPropertyValue(ref _description, value);
+            set => SetPropertyValue(ref _description, value, nameof(Description));
         }
 
         /// <summary>
@@ -54,7 +53,7 @@ namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
         public int NumberValue
         {
             get => _numberValue;
-            set => SetPropertyValue(ref _numberValue, value);
+            set => SetPropertyValue(ref _numberValue, value, nameof(NumberValue));
         }
 
         /// <summary>
@@ -63,7 +62,7 @@ namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
         public decimal DecimalValue
         {
             get => _decimalValue;
-            set => SetPropertyValue(ref _decimalValue, value);
+            set => SetPropertyValue(ref _decimalValue, value, nameof(DecimalValue));
         }
 
         /// <summary>
@@ -72,7 +71,7 @@ namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
         public DateTime DateValue
         {
             get => _dateValue;
-            set => SetPropertyValue(ref _dateValue, value);
+            set => SetPropertyValue(ref _dateValue, value, nameof(DateValue));
         }
 
         /// <summary>
@@ -81,29 +80,27 @@ namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
         public bool BoolValue
         {
             get => _boolValue;
-            set => SetPropertyValue(ref _boolValue, value);
+            set => SetPropertyValue(ref _boolValue, value, nameof(BoolValue));
         }
 
         /// <summary>
         /// Gets or sets the first collection of items (will use custom editor).
         /// </summary>
-        [DevExpress.Xpo.Aggregated]
+        [DevExpress.ExpressApp.DC.Aggregated]
         public BindingList<TestCollectionItem> CollectionItems
         {
             get => _collectionItems;
-            set => SetPropertyValue(ref _collectionItems, value);
+            set => SetPropertyValue(ref _collectionItems, value, nameof(CollectionItems));
         }
 
         /// <summary>
         /// Gets or sets the second collection of detail items (will use custom editor).
         /// </summary>
-        [DevExpress.Xpo.Aggregated]
+        [DevExpress.ExpressApp.DC.Aggregated]
         public BindingList<TestDetailItem> DetailItems
         {
             get => _detailItems;
-            set => SetPropertyValue(ref _detailItems, value);
+            set => SetPropertyValue(ref _detailItems, value, nameof(DetailItems));
         }
-
-        // INotifyPropertyChanged implementation is inherited from NonPersistentBaseObject
     }
 }
