@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<Application Title="CollectionsResolution">
+  <NavigationItems NavigationStyle="TreeList">
+    <Items>
+      <Item Id="Test Render Collections" Caption="Test Render Collections" ImageName="Action_Debug_Start" IsNewNode="True">
+        <Items IsNewNode="True">
+          <Item Id="Non-Persistent" Caption="Non-Persistent" ImageName="Action_Debug_Start" IsNewNode="True">
+            <Items IsNewNode="True">
+              <Item Id="Default Rendering" Caption="Default Rendering" ViewId="CollectionRenderingNonPersistentDefault_ListView" ImageName="Action_Search" IsNewNode="True" />
+              <Item Id="Custom Editor" Caption="Custom Editor" ViewId="CollectionRenderingNonPersistentCustom_ListView" ImageName="Action_Edit" IsNewNode="True" />
+            </Items>
+          </Item>
+        </Items>
+      </Item>
+    </Items>
+  </NavigationItems>
+  <Views>
+  </Views>
+</Application>
