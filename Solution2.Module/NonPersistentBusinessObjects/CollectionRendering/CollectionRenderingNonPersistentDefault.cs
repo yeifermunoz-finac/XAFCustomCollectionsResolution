@@ -4,14 +4,14 @@ using DevExpress.Persistent.Base;
 using System;
 using System.ComponentModel;
 
-namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
+namespace Solution2.Module.NonPersistentBusinessObjects.CollectionRendering
 {
     /// <summary>
-    /// Non-persistent test object to analyze collection rendering issues in XAF Web.
-    /// This object contains primitive types and two collections to test default and custom rendering.
+    /// Non-persistent object to verify collection rendering with default editors in XAF.
+    /// This object contains primitive types and two collections to test default rendering.
     /// </summary>
     [DomainComponent]
-    public class TestCollectionsNonPersistentDefault : NonPersistentLiteObject
+    public class CollectionRenderingNonPersistentDefault : NonPersistentLiteObject
     {
         private string _testName;
         private string _description;
@@ -19,13 +19,13 @@ namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
         private decimal _decimalValue;
         private DateTime _dateValue;
         private bool _boolValue;
-        private BindingList<TestCollectionItem> _collectionItems;
-        private BindingList<TestDetailItem> _detailItems;
+        private BindingList<CollectionItemNonPersistent> _collectionItems;
+        private BindingList<DetailItemNonPersistent> _detailItems;
 
-        public TestCollectionsNonPersistentDefault()
+        public CollectionRenderingNonPersistentDefault()
         {
-            _collectionItems = new BindingList<TestCollectionItem>();
-            _detailItems = new BindingList<TestDetailItem>();
+            _collectionItems = new BindingList<CollectionItemNonPersistent>();
+            _detailItems = new BindingList<DetailItemNonPersistent>();
             _dateValue = DateTime.Today;
         }
 
@@ -87,7 +87,7 @@ namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
         /// Gets or sets the first collection of items.
         /// </summary>
         [DevExpress.ExpressApp.DC.Aggregated]
-        public BindingList<TestCollectionItem> CollectionItems
+        public BindingList<CollectionItemNonPersistent> CollectionItems
         {
             get => _collectionItems;
             set => SetPropertyValue(ref _collectionItems, value, nameof(CollectionItems));
@@ -97,7 +97,7 @@ namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
         /// Gets or sets the second collection of detail items.
         /// </summary>
         [DevExpress.ExpressApp.DC.Aggregated]
-        public BindingList<TestDetailItem> DetailItems
+        public BindingList<DetailItemNonPersistent> DetailItems
         {
             get => _detailItems;
             set => SetPropertyValue(ref _detailItems, value, nameof(DetailItems));

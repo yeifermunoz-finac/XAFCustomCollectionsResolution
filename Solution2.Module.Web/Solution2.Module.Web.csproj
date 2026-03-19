@@ -110,8 +110,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Editors\TestCollectionItemsPropertyEditor.cs" />
-    <Compile Include="Editors\TestDetailItemsPropertyEditor.cs" />
+    <Compile Include="Editors\CollectionItemsPropertyEditor.cs" />
+    <Compile Include="Editors\DetailItemsPropertyEditor.cs" />
     <Compile Include="WebModule.cs">
       <SubType>Component</SubType>
     </Compile>

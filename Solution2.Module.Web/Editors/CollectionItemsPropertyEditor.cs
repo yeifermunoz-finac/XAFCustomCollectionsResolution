@@ -9,23 +9,23 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.Utils;
 using DevExpress.Web;
-using Solution2.Module.NonPersistentBusinessObjects.TestCollections;
+using Solution2.Module.NonPersistentBusinessObjects.CollectionRendering;
 
 namespace Solution2.Module.Web.Editors
 {
     /// <summary>
-    /// Custom Property Editor to display TestCollectionItem collection in a grid
+    /// Custom Property Editor to display CollectionItem collection in a grid
     /// for testing collection rendering in Web applications.
     /// This editor renders an ASPxGridView to display and edit the collection.
     /// </summary>
-    [PropertyEditor(typeof(IList), "TestCollectionItemsPropertyEditor", false)]
-    public class TestCollectionItemsPropertyEditor : ASPxPropertyEditor
+    [PropertyEditor(typeof(IList), "CollectionItemsPropertyEditor", false)]
+    public class CollectionItemsPropertyEditor : ASPxPropertyEditor
     {
         private ASPxGridView grid;
         private Panel containerPanel;
         private const string GRID_ID = "testCollectionItemsGrid";
 
-        public TestCollectionItemsPropertyEditor(Type objectType, IModelMemberViewItem model)
+        public CollectionItemsPropertyEditor(Type objectType, IModelMemberViewItem model)
             : base(objectType, model)
         {
         }
@@ -229,10 +229,10 @@ namespace Solution2.Module.Web.Editors
                     
                     if (!string.IsNullOrEmpty(code))
                     {
-                        TestCollectionItem item = null;
+                        Solution2.Module.NonPersistentBusinessObjects.CollectionRendering.CollectionItemNonPersistent item = null;
                         foreach (var obj in collection)
                         {
-                            var testItem = obj as TestCollectionItem;
+                            var testItem = obj as Solution2.Module.NonPersistentBusinessObjects.CollectionRendering.CollectionItemNonPersistent;
                             if (testItem != null && testItem.Code == code)
                             {
                                 item = testItem;

@@ -3,13 +3,13 @@ using DevExpress.ExpressApp.DC;
 using System;
 using System.ComponentModel;
 
-namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
+namespace Solution2.Module.NonPersistentBusinessObjects.CollectionRendering
 {
     /// <summary>
     /// Represents an item in a collection for testing collection rendering in XAF Web.
     /// </summary>
     [DomainComponent]
-    public class TestCollectionItem : NonPersistentLiteObject
+    public class CollectionItemNonPersistent : NonPersistentLiteObject
     {
         private string _code;
         private string _name;

@@ -9,22 +9,22 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.Utils;
 using DevExpress.Web;
-using Solution2.Module.NonPersistentBusinessObjects.TestCollections;
+using Solution2.Module.NonPersistentBusinessObjects.CollectionRendering;
 
 namespace Solution2.Module.Web.Editors
 {
     /// <summary>
-    /// Custom Property Editor to display TestDetailItem collection in a grid
+    /// Custom Property Editor to display DetailItem collection in a grid
     /// for testing collection rendering in Web applications.
     /// </summary>
-    [PropertyEditor(typeof(IList), "TestDetailItemsPropertyEditor", false)]
-    public class TestDetailItemsPropertyEditor : ASPxPropertyEditor
+    [PropertyEditor(typeof(IList), "DetailItemsPropertyEditor", false)]
+    public class DetailItemsPropertyEditor : ASPxPropertyEditor
     {
         private ASPxGridView grid;
         private Panel containerPanel;
         private const string GRID_ID = "testDetailItemsGrid";
 
-        public TestDetailItemsPropertyEditor(Type objectType, IModelMemberViewItem model)
+        public DetailItemsPropertyEditor(Type objectType, IModelMemberViewItem model)
             : base(objectType, model)
         {
         }
@@ -209,10 +209,10 @@ namespace Solution2.Module.Web.Editors
                     
                     if (!string.IsNullOrEmpty(description))
                     {
-                        TestDetailItem item = null;
+                        Solution2.Module.NonPersistentBusinessObjects.CollectionRendering.DetailItemNonPersistent item = null;
                         foreach (var obj in collection)
                         {
-                            var detailItem = obj as TestDetailItem;
+                            var detailItem = obj as Solution2.Module.NonPersistentBusinessObjects.CollectionRendering.DetailItemNonPersistent;
                             if (detailItem != null && detailItem.Description == description)
                             {
                                 item = detailItem;

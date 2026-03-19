@@ -7,10 +7,10 @@
     </PropertyEditor>
   </ViewItems>
   <Views>
-    <DetailView Id="TestCollectionsNonPersistentCustom_DetailView">
+    <DetailView Id="CollectionRenderingNonPersistentCustom_DetailView">
       <Items>
-        <PropertyEditor Id="CollectionItems" PropertyEditorType="Solution2.Module.Web.Editors.TestCollectionItemsPropertyEditor" />
-        <PropertyEditor Id="DetailItems" PropertyEditorType="Solution2.Module.Web.Editors.TestDetailItemsPropertyEditor" />
+        <PropertyEditor Id="CollectionItems" PropertyEditorType="Solution2.Module.Web.Editors.CollectionItemsPropertyEditor" />
+        <PropertyEditor Id="DetailItems" PropertyEditorType="Solution2.Module.Web.Editors.DetailItemsPropertyEditor" />
       </Items>
     </DetailView>
   </Views>

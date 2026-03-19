@@ -5,18 +5,18 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-namespace Solution2.Module.NonPersistentBusinessObjects.TestCollections
+namespace Solution2.Module.NonPersistentBusinessObjects.CollectionRendering
 {
     /// <summary>
-    /// Minimal storage adapter for non-persistent objects.
+    /// Storage adapter for collection rendering non-persistent objects.
     /// Required for Web platform to persist objects across HTTP requests.
     /// </summary>
-    public class TestCollectionsStorageAdapter
+    public class CollectionRenderingStorageAdapter
     {
         private static readonly ConcurrentDictionary<Guid, object> _globalStorage = new ConcurrentDictionary<Guid, object>();
         private readonly NonPersistentObjectSpace _objectSpace;
 
-        public TestCollectionsStorageAdapter(NonPersistentObjectSpace objectSpace)
+        public CollectionRenderingStorageAdapter(NonPersistentObjectSpace objectSpace)
         {
             _objectSpace = objectSpace;
             

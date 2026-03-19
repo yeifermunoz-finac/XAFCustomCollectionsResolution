@@ -95,11 +95,11 @@
     <Compile Include="Module.Designer.cs">
       <DependentUpon>Module.cs</DependentUpon>
     </Compile>
-    <Compile Include="NonPersistentBusinessObjects\TestCollections\TestCollectionItem.cs" />
-    <Compile Include="NonPersistentBusinessObjects\TestCollections\TestCollectionsNonPersistentDefault.cs" />
-    <Compile Include="NonPersistentBusinessObjects\TestCollections\TestCollectionsNonPersistentCustom.cs" />
-    <Compile Include="NonPersistentBusinessObjects\TestCollections\TestCollectionsStorageAdapter.cs" />
-    <Compile Include="NonPersistentBusinessObjects\TestCollections\TestDetailItem.cs" />
+    <Compile Include="NonPersistentBusinessObjects\CollectionRendering\CollectionItemNonPersistent.cs" />
+    <Compile Include="NonPersistentBusinessObjects\CollectionRendering\CollectionRenderingNonPersistentDefault.cs" />
+    <Compile Include="NonPersistentBusinessObjects\CollectionRendering\CollectionRenderingNonPersistentCustom.cs" />
+    <Compile Include="NonPersistentBusinessObjects\CollectionRendering\CollectionRenderingStorageAdapter.cs" />
+    <Compile Include="NonPersistentBusinessObjects\CollectionRendering\DetailItemNonPersistent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
