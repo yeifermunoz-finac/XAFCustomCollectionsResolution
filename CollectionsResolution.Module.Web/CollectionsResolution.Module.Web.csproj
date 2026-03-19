@@ -110,6 +110,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Editors\EditableCollectionPropertyEditorBase.cs" />
     <Compile Include="Editors\CollectionItemsPropertyEditor.cs" />
     <Compile Include="Editors\DetailItemsPropertyEditor.cs" />
     <Compile Include="Editors\SubCollectionItemsPropertyEditor.cs" />
