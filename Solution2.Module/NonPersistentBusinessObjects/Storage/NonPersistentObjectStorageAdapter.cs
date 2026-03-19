@@ -1,22 +1,24 @@
 using DevExpress.ExpressApp;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 
-namespace Solution2.Module.NonPersistentBusinessObjects.CollectionRendering
+namespace Solution2.Module.NonPersistentBusinessObjects.Storage
 {
     /// <summary>
-    /// Storage adapter for collection rendering non-persistent objects.
+    /// Storage adapter for non-persistent objects.
     /// Required for Web platform to persist objects across HTTP requests.
+    /// 
+    /// Uses IXafEntityObject as the storage type (common interface for all XAF entities).
+    /// Supports NonPersistentLiteObject and NonPersistentBaseObject which provide auto-generated Oid.
+    /// Note: NonPersistentEntityObject is not supported unless it manually defines an Oid property.
     /// </summary>
-    public class CollectionRenderingStorageAdapter
+    public class NonPersistentObjectStorageAdapter
     {
-        private static readonly ConcurrentDictionary<Guid, object> _globalStorage = new ConcurrentDictionary<Guid, object>();
+        private static readonly ConcurrentDictionary<Guid, IXafEntityObject> _globalStorage = new ConcurrentDictionary<Guid, IXafEntityObject>();
         private readonly NonPersistentObjectSpace _objectSpace;
 
-        public CollectionRenderingStorageAdapter(NonPersistentObjectSpace objectSpace)
+        public NonPersistentObjectStorageAdapter(NonPersistentObjectSpace objectSpace)
         {
             _objectSpace = objectSpace;
             
@@ -29,9 +31,9 @@ namespace Solution2.Module.NonPersistentBusinessObjects.CollectionRendering
         private void ObjectSpace_ObjectsGetting(object sender, ObjectsGettingEventArgs e)
         {
             // Return stored objects of the requested type
-            if (typeof(NonPersistentLiteObject).IsAssignableFrom(e.ObjectType))
+            if (typeof(IXafEntityObject).IsAssignableFrom(e.ObjectType))
             {
-                var objects = new BindingList<object>();
+                var objects = new BindingList<IXafEntityObject>();
                 objects.AllowNew = true;
                 objects.AllowEdit = true;
                 objects.AllowRemove = true;
@@ -55,17 +57,29 @@ namespace Solution2.Module.NonPersistentBusinessObjects.CollectionRendering
 
             foreach (var obj in objectSpace.ModifiedObjects)
             {
-                if (obj is NonPersistentLiteObject nonPersistent)
+                if (obj is IXafEntityObject entityObject)
                 {
+                    // Get Oid using pattern matching for type-safe resolution
+                    // Only NonPersistentLiteObject and NonPersistentBaseObject have auto-generated Oid
+                    var oid = entityObject switch
+                    {
+                        NonPersistentLiteObject liteObject => liteObject.Oid,
+                        NonPersistentBaseObject baseObject => baseObject.Oid,
+                        _ => Guid.Empty
+                    };
+
+                    if (oid == Guid.Empty)
+                        continue; // Skip objects without valid Oid
+
                     if (objectSpace.IsDeletedObject(obj))
                     {
                         // Remove from storage
-                        _globalStorage.TryRemove(nonPersistent.Oid, out _);
+                        _globalStorage.TryRemove(oid, out _);
                     }
                     else
                     {
                         // Add or update in storage
-                        _globalStorage.AddOrUpdate(nonPersistent.Oid, obj, (key, existingValue) => obj);
+                        _globalStorage.AddOrUpdate(oid, entityObject, (key, existingValue) => entityObject);
                     }
                 }
             }

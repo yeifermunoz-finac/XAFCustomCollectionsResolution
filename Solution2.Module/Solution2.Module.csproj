@@ -98,7 +98,7 @@
     <Compile Include="NonPersistentBusinessObjects\CollectionRendering\CollectionItemNonPersistent.cs" />
     <Compile Include="NonPersistentBusinessObjects\CollectionRendering\CollectionRenderingNonPersistentDefault.cs" />
     <Compile Include="NonPersistentBusinessObjects\CollectionRendering\CollectionRenderingNonPersistentCustom.cs" />
-    <Compile Include="NonPersistentBusinessObjects\CollectionRendering\CollectionRenderingStorageAdapter.cs" />
+    <Compile Include="NonPersistentBusinessObjects\Storage\NonPersistentObjectStorageAdapter.cs" />
     <Compile Include="NonPersistentBusinessObjects\CollectionRendering\DetailItemNonPersistent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

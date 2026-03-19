@@ -15,7 +15,7 @@ using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.DomainLogics;
 using DevExpress.ExpressApp.Model.NodeGenerators;
 using DevExpress.ExpressApp.Xpo;
-using Solution2.Module.NonPersistentBusinessObjects.CollectionRendering;
+using Solution2.Module.NonPersistentBusinessObjects.Storage;
 
 namespace Solution2.Module {
     // For more typical usage scenarios, be sure to check out https://documentation.devexpress.com/eXpressAppFramework/clsDevExpressExpressAppModuleBasetopic.aspx.
@@ -39,7 +39,7 @@ namespace Solution2.Module {
         private void Application_ObjectSpaceCreated(object sender, ObjectSpaceCreatedEventArgs e) {
             if (e.ObjectSpace is NonPersistentObjectSpace nonPersistentObjectSpace) {
                 // Create storage adapter to handle ObjectsGetting and Committing events
-                new CollectionRenderingStorageAdapter(nonPersistentObjectSpace);
+                new NonPersistentObjectStorageAdapter(nonPersistentObjectSpace);
             }
         }
 
