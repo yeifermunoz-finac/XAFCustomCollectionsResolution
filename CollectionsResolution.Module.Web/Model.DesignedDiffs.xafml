@@ -9,7 +9,15 @@
   <Views>
     <DetailView Id="CollectionRenderingNonPersistentCustom_DetailView">
       <Items>
-        <PropertyEditor Id="CollectionItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.CollectionItemsPropertyEditor" />
+        <PropertyEditor Id="CollectionItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.CollectionItemsPropertyEditor">
+          <MemberDetailView>
+            <DetailView Id="CollectionRenderingNonPersistentCustom_CollectionItems_ListView_DetailView">
+              <Items>
+                <PropertyEditor Id="SubItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.SubCollectionItemsPropertyEditor" />
+              </Items>
+            </DetailView>
+          </MemberDetailView>
+        </PropertyEditor>
         <PropertyEditor Id="DetailItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.DetailItemsPropertyEditor" />
       </Items>
     </DetailView>

@@ -1,11 +1,13 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using System;
+using System.ComponentModel;
 
 namespace CollectionsResolution.Module.NonPersistentBusinessObjects.CollectionRendering
 {
     /// <summary>
     /// Represents an item in a collection for testing collection rendering in XAF Web.
+    /// This object demonstrates how sub-collections are rendered.
     /// </summary>
     [DomainComponent]
     public class CollectionItemNonPersistent : NonPersistentLiteObject
@@ -15,6 +17,12 @@ namespace CollectionsResolution.Module.NonPersistentBusinessObjects.CollectionRe
         private decimal _amount;
         private DateTime _date;
         private bool _isActive;
+        private BindingList<SubCollectionItemNonPersistent> _subItems;
+
+        public CollectionItemNonPersistent()
+        {
+            _subItems = new BindingList<SubCollectionItemNonPersistent>();
+        }
 
         /// <summary>
         /// Gets or sets the code of the collection item.
@@ -59,6 +67,16 @@ namespace CollectionsResolution.Module.NonPersistentBusinessObjects.CollectionRe
         {
             get => _isActive;
             set => SetPropertyValue(ref _isActive, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the sub-collection of items to demonstrate nested collection rendering.
+        /// </summary>
+        [DevExpress.ExpressApp.DC.Aggregated]
+        public BindingList<SubCollectionItemNonPersistent> SubItems
+        {
+            get => _subItems;
+            set => SetPropertyValue(ref _subItems, value, nameof(SubItems));
         }
 
         // INotifyPropertyChanged implementation is inherited from NonPersistentLiteObject
