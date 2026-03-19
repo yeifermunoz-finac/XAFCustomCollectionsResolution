@@ -34,7 +34,7 @@ namespace CollectionsResolution.Module.NonPersistentBusinessObjects.CollectionRe
         public string TestName
         {
             get => _testName;
-            set => SetPropertyValue(ref _testName, value, nameof(TestName));
+            set => SetPropertyValue(ref _testName, value);
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace CollectionsResolution.Module.NonPersistentBusinessObjects.CollectionRe
         public string Description
         {
             get => _description;
-            set => SetPropertyValue(ref _description, value, nameof(Description));
+            set => SetPropertyValue(ref _description, value);
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace CollectionsResolution.Module.NonPersistentBusinessObjects.CollectionRe
         public int NumberValue
         {
             get => _numberValue;
-            set => SetPropertyValue(ref _numberValue, value, nameof(NumberValue));
+            set => SetPropertyValue(ref _numberValue, value);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace CollectionsResolution.Module.NonPersistentBusinessObjects.CollectionRe
         public decimal DecimalValue
         {
             get => _decimalValue;
-            set => SetPropertyValue(ref _decimalValue, value, nameof(DecimalValue));
+            set => SetPropertyValue(ref _decimalValue, value);
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace CollectionsResolution.Module.NonPersistentBusinessObjects.CollectionRe
         public DateTime DateValue
         {
             get => _dateValue;
-            set => SetPropertyValue(ref _dateValue, value, nameof(DateValue));
+            set => SetPropertyValue(ref _dateValue, value);
         }
 
         /// <summary>
@@ -79,27 +79,27 @@ namespace CollectionsResolution.Module.NonPersistentBusinessObjects.CollectionRe
         public bool BoolValue
         {
             get => _boolValue;
-            set => SetPropertyValue(ref _boolValue, value, nameof(BoolValue));
+            set => SetPropertyValue(ref _boolValue, value);
         }
 
         /// <summary>
         /// Gets or sets the first collection of items (will use custom editor).
         /// </summary>
-        [DevExpress.ExpressApp.DC.Aggregated]
+        [Aggregated]
         public BindingList<CollectionItemNonPersistent> CollectionItems
         {
             get => _collectionItems;
-            set => SetPropertyValue(ref _collectionItems, value, nameof(CollectionItems));
+            set => SetPropertyValue(ref _collectionItems, value);
         }
 
         /// <summary>
         /// Gets or sets the second collection of detail items (will use custom editor).
         /// </summary>
-        [DevExpress.ExpressApp.DC.Aggregated]
+        [Aggregated]
         public BindingList<DetailItemNonPersistent> DetailItems
         {
             get => _detailItems;
-            set => SetPropertyValue(ref _detailItems, value, nameof(DetailItems));
+            set => SetPropertyValue(ref _detailItems, value);
         }
     }
 }

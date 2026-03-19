@@ -72,11 +72,11 @@ namespace CollectionsResolution.Module.NonPersistentBusinessObjects.CollectionRe
         /// <summary>
         /// Gets or sets the sub-collection of items to demonstrate nested collection rendering.
         /// </summary>
-        [DevExpress.ExpressApp.DC.Aggregated]
+        [Aggregated]
         public BindingList<SubCollectionItemNonPersistent> SubItems
         {
             get => _subItems;
-            set => SetPropertyValue(ref _subItems, value, nameof(SubItems));
+            set => SetPropertyValue(ref _subItems, value);
         }
 
         // INotifyPropertyChanged implementation is inherited from NonPersistentLiteObject
