@@ -11,7 +11,7 @@ namespace Solution2.Module.NonPersistentBusinessObjects.Storage
     /// 
     /// Uses IXafEntityObject as the storage type (common interface for all XAF entities).
     /// Supports NonPersistentLiteObject and NonPersistentBaseObject which provide auto-generated Oid.
-    /// Note: NonPersistentEntityObject is not supported unless it manually defines an Oid property.
+    /// Note: NonPersistentEntityObject and NonPersistentObjectImpl are not supported unless manually defines an Oid property.
     /// </summary>
     public class NonPersistentObjectStorageAdapter
     {

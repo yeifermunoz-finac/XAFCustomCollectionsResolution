@@ -1,7 +1,5 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
-using System;
-using System.ComponentModel;
 
 namespace Solution2.Module.NonPersistentBusinessObjects.CollectionRendering
 {

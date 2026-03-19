@@ -10,6 +10,7 @@
     <RootNamespace>Solution2.Module</RootNamespace>
     <AssemblyName>Solution2.Module</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>8.0</LangVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
