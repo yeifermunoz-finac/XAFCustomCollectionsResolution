@@ -17,6 +17,7 @@ namespace CollectionsResolution.Module.NonPersistentBusinessObjects.CollectionRe
         /// <summary>
         /// Gets or sets the description of the detail item.
         /// </summary>
+        [FieldSize(FieldSizeAttribute.Unlimited)]
         public string Description
         {
             get => _description;

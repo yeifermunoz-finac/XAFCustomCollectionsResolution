@@ -89,6 +89,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BusinessObjects\CollectionRendering\CollectionItemPersistent.cs" />
+    <Compile Include="BusinessObjects\CollectionRendering\CollectionRenderingPersistentDefault.cs" />
+    <Compile Include="BusinessObjects\CollectionRendering\DetailItemPersistent.cs" />
+    <Compile Include="BusinessObjects\CollectionRendering\SubCollectionItemPersistent.cs" />
     <Compile Include="DatabaseUpdate\Updater.cs" />
     <Compile Include="Module.cs">
       <SubType>Component</SubType>
