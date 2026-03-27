@@ -15,22 +15,22 @@ namespace CollectionsResolution.Module.Web.Editors
     /// Inherits from EditableCollectionPropertyEditorBase to get edit mode detection.
     /// Registered with isDefaultEditor=false to allow view-specific assignment via XAFML.
     /// </summary>
-    [PropertyEditor(typeof(BindingList<CollectionItemNonPersistent>), "CollectionItemsPropertyEditor", false)]
-    public class CollectionItemsPropertyEditor : EditableCollectionPropertyEditorBase
+    [PropertyEditor(typeof(BindingList<CollectionItemNonPersistent>), "CollectionItemsNonPersistentPropertyEditor", false)]
+    public class CollectionItemsNonPersistentPropertyEditor : EditableCollectionPropertyEditorBase
     {
-        public CollectionItemsPropertyEditor(Type objectType, IModelMemberViewItem model)
+        public CollectionItemsNonPersistentPropertyEditor(Type objectType, IModelMemberViewItem model)
             : base(objectType, model)
         {
         }
 
         protected override string GetPanelId()
         {
-            return "testCollectionItemsPanel";
+            return "CollectionItemsNonPersistentPanel";
         }
 
         protected override string GetGridId()
         {
-            return "testCollectionItemsGrid";
+            return "CollectionItemsNonPersistentGrid";
         }
 
         protected override void DefineColumns()

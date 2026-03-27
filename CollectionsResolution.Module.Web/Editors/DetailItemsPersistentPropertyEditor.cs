@@ -23,12 +23,12 @@ namespace CollectionsResolution.Module.Web.Editors
 
         protected override string GetPanelId()
         {
-            return "testDetailItemsPersistentPanel";
+            return "DetailItemsPersistentPanel";
         }
 
         protected override string GetGridId()
         {
-            return "testDetailItemsPersistentGrid";
+            return "DetailItemsPersistentGrid";
         }
 
         protected override void DefineColumns()

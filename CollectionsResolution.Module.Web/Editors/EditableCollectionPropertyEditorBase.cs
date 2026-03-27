@@ -36,6 +36,11 @@ namespace CollectionsResolution.Module.Web.Editors
         private IList collectionSource;
         private bool? isEditMode = null;
         private GridViewCommandColumn commandColumn;
+        
+        // Dictionary to map temporary Oids (from InitNewRow) to real object Oids (after RowInserting)
+        // This allows the Details button to work on newly created objects before the parent is saved
+        private System.Collections.Generic.Dictionary<Guid, Guid> tempOidMapping = 
+            new System.Collections.Generic.Dictionary<Guid, Guid>();
 
         /// <summary>
         /// Fired when user clicks the "Details" button for an item
@@ -284,7 +289,11 @@ namespace CollectionsResolution.Module.Web.Editors
             // Without a key value in e.NewValues, the grid's state machine cannot properly
             // identify the row as being in "insert" mode, causing cells to appear non-editable
             // This is especially critical for the first item in an empty collection
-            e.NewValues["Oid"] = Guid.NewGuid();
+            var tempOid = Guid.NewGuid();
+            e.NewValues["Oid"] = tempOid;
+            
+            // The temporary Oid will be mapped to the real object's Oid in Grid_RowInserting
+            // This allows the Details button to work on newly created objects before saving
             
             // Call virtual method for derived classes to set additional default values
             // The actual object will be created in RowInserting when user clicks Update
@@ -313,10 +322,27 @@ namespace CollectionsResolution.Module.Web.Editors
                 if (!grid.IsEditing && !grid.IsNewRowEditing)
                 {
                     // Get the Oid from the row's key value
-                    var oid = grid.GetRowValues(e.VisibleIndex, "Oid");
-                    if (oid != null && PropertyValue is IList collection)
+                    var oidFromGrid = grid.GetRowValues(e.VisibleIndex, "Oid");
+                    if (oidFromGrid != null && PropertyValue is IList collection)
                     {
-                        // Find the object by Oid
+                        Guid oidToFind = Guid.Empty;
+                        
+                        // Check if this is a temporary Oid that needs to be mapped to the real object's Oid
+                        if (oidFromGrid is Guid gridGuid)
+                        {
+                            if (tempOidMapping.ContainsKey(gridGuid))
+                            {
+                                // Use the real Oid
+                                oidToFind = tempOidMapping[gridGuid];
+                            }
+                            else
+                            {
+                                // No mapping found, use the grid Oid as-is (for already persisted objects)
+                                oidToFind = gridGuid;
+                            }
+                        }
+                        
+                        // Find the object by Oid in the collection
                         object item = null;
                         foreach (var obj in collection)
                         {
@@ -324,7 +350,7 @@ namespace CollectionsResolution.Module.Web.Editors
                             if (oidProp != null)
                             {
                                 var itemOid = oidProp.GetValue(obj, null);
-                                if (itemOid != null && itemOid.Equals(oid))
+                                if (itemOid != null && itemOid is Guid itemGuid && itemGuid == oidToFind)
                                 {
                                     item = obj;
                                     break;
@@ -363,9 +389,14 @@ namespace CollectionsResolution.Module.Web.Editors
                         newItem = Activator.CreateInstance(itemType);
                     }
                     
-                    // Set properties from grid's new values
+                    // Set properties from grid's new values (skip Oid - it's auto-generated)
+                    var tempOid = e.NewValues["Oid"]; // Store temp Oid before processing
                     foreach (var key in e.NewValues.Keys)
                     {
+                        // Skip the Oid property - it's read-only and auto-generated
+                        if (key.ToString() == "Oid")
+                            continue;
+                            
                         var propInfo = itemType.GetProperty(key.ToString());
                         if (propInfo != null && propInfo.CanWrite)
                         {
@@ -410,6 +441,22 @@ namespace CollectionsResolution.Module.Web.Editors
                     
                     // Add to collection
                     collection.Add(newItem);
+                    
+                    // Map the temporary Oid to the real object's Oid for Details button support
+                    // This allows clicking Details on a newly created object before saving the parent
+                    if (tempOid != null)
+                    {
+                        var realOidProp = newItem.GetType().GetProperty("Oid");
+                        if (realOidProp != null)
+                        {
+                            var realOid = realOidProp.GetValue(newItem, null);
+                            if (realOid != null && tempOid is Guid tempGuid && realOid is Guid realGuid)
+                            {
+                                // Map temp Oid -> real Oid in our instance dictionary
+                                tempOidMapping[tempGuid] = realGuid;
+                            }
+                        }
+                    }
                 }
                 
                 // CRITICAL: Correct sequence for manual insertion
