@@ -113,8 +113,11 @@
     <Compile Include="Controllers\ShowNonPersistentDetailPopupController.cs" />
     <Compile Include="Editors\EditableCollectionPropertyEditorBase.cs" />
     <Compile Include="Editors\CollectionItemsPropertyEditor.cs" />
+    <Compile Include="Editors\CollectionItemsPersistentPropertyEditor.cs" />
     <Compile Include="Editors\DetailItemsPropertyEditor.cs" />
+    <Compile Include="Editors\DetailItemsPersistentPropertyEditor.cs" />
     <Compile Include="Editors\SubCollectionItemsPropertyEditor.cs" />
+    <Compile Include="Editors\SubCollectionItemsPersistentPropertyEditor.cs" />
     <Compile Include="WebModule.cs">
       <SubType>Component</SubType>
     </Compile>

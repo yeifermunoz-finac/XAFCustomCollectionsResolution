@@ -12,6 +12,7 @@
           </Item>
           <Item Id="Persistent" Caption="Persistent" ImageName="BO_List" IsNewNode="True">
             <Items IsNewNode="True">
+              <Item Id="Custom Editor" Caption="Custom Editor" ViewId="CollectionRenderingPersistentCustom_ListView" ImageName="Action_Edit" IsNewNode="True" />
               <Item Id="Default Rendering" Caption="Default Rendering" ViewId="CollectionRenderingPersistentDefault_ListView" ImageName="Action_Search" IsNewNode="True" />
             </Items>
           </Item>

@@ -229,13 +229,21 @@ namespace CollectionsResolution.Module.Web.Editors
             // Determine if we're in edit mode based on DetailView.ViewEditMode
             bool shouldEnableEditing = false;
             
+            // In XAF, collection properties typically don't have setters, so AllowEdit on the 
+            // property editor itself will be false. We should rely on the DetailView's edit mode
+            // and the Model's AllowEdit specifically for this property if set.
+            // For now, if it's a collection, we allow editing of items if the view is in edit mode.
             if (View is DetailView detailView)
             {
                 shouldEnableEditing = detailView.ViewEditMode == ViewEditMode.Edit;
+                
+                // For list properties (collections), we usually ignore the property's AllowEdit 
+                // because collections naturally don't have setters. We only disable if explicitly read-only.
+                if (Model != null && !Model.AllowEdit && MemberInfo != null && !MemberInfo.IsList)
+                {
+                    shouldEnableEditing = false;
+                }
             }
-            
-            // Also consider AllowEdit just in case security disables it
-            shouldEnableEditing = shouldEnableEditing && AllowEdit;
 
             // Only update if state changed (null != false -> true, so it will apply on first run)
             if (isEditMode != shouldEnableEditing)
@@ -342,7 +350,18 @@ namespace CollectionsResolution.Module.Web.Editors
                 if (PropertyValue is IList collection && MemberInfo != null)
                 {
                     var itemType = MemberInfo.ListElementType;
-                    var newItem = Activator.CreateInstance(itemType);
+                    
+                    // Use ObjectSpace to create the object properly (supports XPO and Non-Persistent)
+                    object newItem;
+                    if (View != null && View.ObjectSpace != null)
+                    {
+                        newItem = View.ObjectSpace.CreateObject(itemType);
+                    }
+                    else
+                    {
+                        // Fallback
+                        newItem = Activator.CreateInstance(itemType);
+                    }
                     
                     // Set properties from grid's new values
                     foreach (var key in e.NewValues.Keys)
@@ -557,6 +576,13 @@ namespace CollectionsResolution.Module.Web.Editors
                     if (itemToDelete != null && OnItemDeleting(itemToDelete))
                     {
                         collection.Remove(itemToDelete);
+                        
+                        // For persistent objects, we must explicitly delete them using ObjectSpace
+                        // so they are marked as deleted in the database (or removed completely if aggregated).
+                        if (View != null && View.ObjectSpace != null)
+                        {
+                            View.ObjectSpace.Delete(itemToDelete);
+                        }
                     }
                 }
                 

@@ -90,9 +90,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BusinessObjects\CollectionRendering\CollectionItemPersistent.cs" />
+    <Compile Include="BusinessObjects\CollectionRendering\CollectionItemPersistentCustom.cs" />
+    <Compile Include="BusinessObjects\CollectionRendering\CollectionRenderingPersistentCustom.cs" />
     <Compile Include="BusinessObjects\CollectionRendering\CollectionRenderingPersistentDefault.cs" />
     <Compile Include="BusinessObjects\CollectionRendering\DetailItemPersistent.cs" />
+    <Compile Include="BusinessObjects\CollectionRendering\DetailItemPersistentCustom.cs" />
     <Compile Include="BusinessObjects\CollectionRendering\SubCollectionItemPersistent.cs" />
+    <Compile Include="BusinessObjects\CollectionRendering\SubCollectionItemPersistentCustom.cs" />
     <Compile Include="DatabaseUpdate\Updater.cs" />
     <Compile Include="Module.cs">
       <SubType>Component</SubType>
