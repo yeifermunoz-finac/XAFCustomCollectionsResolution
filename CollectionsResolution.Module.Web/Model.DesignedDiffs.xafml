@@ -7,19 +7,19 @@
     </PropertyEditor>
   </ViewItems>
   <Views>
-    <!-- Custom rendering: Apply custom property editors only to CollectionRenderingNonPersistentCustom view -->
+    <!-- Custom rendering: Apply custom ASPx editable collection property editor -->
     <DetailView Id="CollectionRenderingNonPersistentCustom_DetailView">
       <Items>
-        <PropertyEditor Id="CollectionItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.CollectionItemsPropertyEditor" />
-        <PropertyEditor Id="DetailItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.DetailItemsPropertyEditor" />
+        <PropertyEditor Id="CollectionItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.CustomASPxEditableCollectionPropertyEditor" />
+        <PropertyEditor Id="DetailItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.CustomASPxEditableCollectionPropertyEditor" />
       </Items>
     </DetailView>
     
     <!-- Custom rendering for persistent custom object -->
     <DetailView Id="CollectionRenderingPersistentCustom_DetailView">
       <Items>
-        <PropertyEditor Id="CollectionItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.CollectionItemsPersistentPropertyEditor" />
-        <PropertyEditor Id="DetailItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.DetailItemsPersistentPropertyEditor" />
+        <PropertyEditor Id="CollectionItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.CustomASPxEditableCollectionPropertyEditor" />
+        <PropertyEditor Id="DetailItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.CustomASPxEditableCollectionPropertyEditor" />
       </Items>
     </DetailView>
 
@@ -31,7 +31,7 @@
         <PropertyEditor Id="Amount" PropertyName="Amount" IsNewNode="True" />
         <PropertyEditor Id="Date" PropertyName="Date" IsNewNode="True" />
         <PropertyEditor Id="IsActive" PropertyName="IsActive" IsNewNode="True" />
-        <PropertyEditor Id="SubItems" PropertyName="SubItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.SubCollectionItemsPersistentPropertyEditor" IsNewNode="True" />
+        <PropertyEditor Id="SubItems" PropertyName="SubItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.CustomASPxEditableCollectionPropertyEditor" IsNewNode="True" />
       </Items>
       <Layout IsNewNode="True">
         <LayoutGroup Id="Main" RelativeSize="100" IsNewNode="True">
@@ -65,7 +65,7 @@
         <PropertyEditor Id="Amount" PropertyName="Amount" IsNewNode="True" />
         <PropertyEditor Id="Date" PropertyName="Date" IsNewNode="True" />
         <PropertyEditor Id="IsActive" PropertyName="IsActive" IsNewNode="True" />
-        <PropertyEditor Id="SubItems" PropertyName="SubItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.SubCollectionItemsPropertyEditor" IsNewNode="True" />
+        <PropertyEditor Id="SubItems" PropertyName="SubItems" PropertyEditorType="CollectionsResolution.Module.Web.Editors.CustomASPxEditableCollectionPropertyEditor" IsNewNode="True" />
       </Items>
       <Layout IsNewNode="True">
         <LayoutGroup Id="Main" RelativeSize="100" IsNewNode="True">

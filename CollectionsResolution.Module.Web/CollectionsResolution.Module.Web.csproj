@@ -111,13 +111,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\ShowNonPersistentDetailPopupController.cs" />
-    <Compile Include="Editors\EditableCollectionPropertyEditorBase.cs" />
-    <Compile Include="Editors\CollectionItemsNonPersistentPropertyEditor.cs" />
-    <Compile Include="Editors\CollectionItemsPersistentPropertyEditor.cs" />
-    <Compile Include="Editors\DetailItemsNonPersistentPropertyEditor.cs" />
-    <Compile Include="Editors\DetailItemsPersistentPropertyEditor.cs" />
-    <Compile Include="Editors\SubCollectionItemsNonPersistentPropertyEditor.cs" />
-    <Compile Include="Editors\SubCollectionItemsPersistentPropertyEditor.cs" />
+    <Compile Include="Editors\CustomASPxEditableCollectionPropertyEditor.cs" />
+    <Compile Include="Editors\GridColumnBuilder.cs" />
     <Compile Include="WebModule.cs">
       <SubType>Component</SubType>
     </Compile>

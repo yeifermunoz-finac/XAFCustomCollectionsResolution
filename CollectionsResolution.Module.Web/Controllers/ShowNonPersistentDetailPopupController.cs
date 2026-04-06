@@ -20,7 +20,7 @@ namespace CollectionsResolution.Module.Web.Controllers
             // Subscribe to ShowDetailRequested event for all property editors in the view
             foreach (PropertyEditor propertyEditor in View.GetItems<PropertyEditor>())
             {
-                if (propertyEditor is EditableCollectionPropertyEditorBase editableEditor)
+                if (propertyEditor is CustomASPxEditableCollectionPropertyEditor editableEditor)
                 {
                     editableEditor.ShowDetailRequested += EditableEditor_ShowDetailRequested;
                 }
@@ -32,7 +32,7 @@ namespace CollectionsResolution.Module.Web.Controllers
             // Unsubscribe from events to prevent memory leaks
             foreach (PropertyEditor propertyEditor in View.GetItems<PropertyEditor>())
             {
-                if (propertyEditor is EditableCollectionPropertyEditorBase editableEditor)
+                if (propertyEditor is CustomASPxEditableCollectionPropertyEditor editableEditor)
                 {
                     editableEditor.ShowDetailRequested -= EditableEditor_ShowDetailRequested;
                 }

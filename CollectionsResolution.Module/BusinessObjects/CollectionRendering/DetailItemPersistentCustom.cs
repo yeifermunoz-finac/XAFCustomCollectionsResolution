@@ -2,6 +2,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl;
 using DevExpress.Xpo;
 using System;
+using CollectionsResolution.Module.Attributes;
 
 namespace CollectionsResolution.Module.BusinessObjects.CollectionRendering
 {
@@ -17,6 +18,7 @@ namespace CollectionsResolution.Module.BusinessObjects.CollectionRendering
         /// Gets or sets the description of the detail item.
         /// </summary>
         [Size(SizeAttribute.Unlimited)]
+        [GridColumnDefinition(Caption = "Description", Width = 400, AllowEdit = true)]
         public string Description
         {
             get => _description;

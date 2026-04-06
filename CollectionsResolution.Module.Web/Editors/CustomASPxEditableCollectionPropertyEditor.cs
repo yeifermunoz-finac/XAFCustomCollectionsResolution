@@ -12,12 +12,6 @@ using DevExpress.Web;
 namespace CollectionsResolution.Module.Web.Editors
 {
     /// <summary>
-    /// Base class for editable collection property editors in Web applications.
-    /// Provides common functionality for displaying and editing collections in ASPxGridView with inline editing.
-    /// Automatically enables/disables editing based on the parent DetailView's edit mode.
-    /// Follows the pattern from NPXMLFormatsListPropertyEditor using postback mode.
-    /// </summary>
-    /// <summary>
     /// Event args for when user requests to show detail view of an item
     /// </summary>
     public class ShowDetailRequestedEventArgs : EventArgs
@@ -29,25 +23,137 @@ namespace CollectionsResolution.Module.Web.Editors
         }
     }
 
-    public abstract class EditableCollectionPropertyEditorBase : ASPxPropertyEditor
+    /// <summary>
+    /// Event args for item creation lifecycle event
+    /// </summary>
+    public class ItemCreatedEventArgs : EventArgs
+    {
+        public object NewItem { get; set; }
+        public object ParentObject { get; set; }
+        public ItemCreatedEventArgs(object newItem, object parentObject)
+        {
+            NewItem = newItem;
+            ParentObject = parentObject;
+        }
+    }
+
+    /// <summary>
+    /// Event args for item update lifecycle event
+    /// </summary>
+    public class ItemUpdatedEventArgs : EventArgs
+    {
+        public object Item { get; set; }
+        public ItemUpdatedEventArgs(object item)
+        {
+            Item = item;
+        }
+    }
+
+    /// <summary>
+    /// Event args for item deletion lifecycle event
+    /// </summary>
+    public class ItemDeletingEventArgs : System.ComponentModel.CancelEventArgs
+    {
+        public object Item { get; set; }
+        public ItemDeletingEventArgs(object item)
+        {
+            Item = item;
+        }
+    }
+
+    /// <summary>
+    /// Custom property editor for editable collections in ASP.NET Web applications.
+    /// Handles any collection type (persistent XPCollection, non-persistent BindingList, or any IList).
+    /// Provides inline editing with full CRUD operations via ASPxGridView.
+    /// Automatically generates columns based on collection element type using reflection.
+    /// Automatically enables/disables editing based on the parent DetailView's edit mode.
+    /// Can be assigned to specific properties via XAFML Model.DesignedDiffs.
+    /// </summary>
+    /// <remarks>
+    /// This single unified property editor handles all collection types uniformly,
+    /// eliminating the need to create a new property editor for each collection type.
+    /// 
+    /// Usage in XAFML:
+    /// <![CDATA[
+    /// <DetailView Id="YourClass_DetailView">
+    ///   <Items>
+    ///     <PropertyEditor Id="YourCollectionProperty" 
+    ///                     PropertyEditorType="CollectionsResolution.Module.Web.Editors.CustomASPxEditableCollectionPropertyEditor" />
+    ///   </Items>
+    /// </DetailView>
+    /// ]]>
+    /// 
+    /// Features:
+    /// - Full CRUD support (Create, Read, Update, Delete)
+    /// - Automatic column generation via reflection
+    /// - Edit mode synchronization with parent DetailView
+    /// - Details button for opening nested detail views
+    /// - Support for persistent and non-persistent collections
+    /// - Unique control IDs to avoid conflicts when multiple collections are displayed
+    /// 
+    /// Extensibility:
+    /// - Use events (InitNewRow, ItemCreated, ItemUpdated, ItemDeleting, etc.) to customize behavior without inheritance
+    /// - Override virtual methods (DefineColumns, GetKeyFieldName, etc.) for structural customizations
+    /// - Subscribe to ShowDetailRequested event via ShowNonPersistentDetailPopupController for custom detail view handling
+    /// </remarks>
+    [PropertyEditor(typeof(IList), "CustomASPxEditableCollectionPropertyEditor", false)]
+    public class CustomASPxEditableCollectionPropertyEditor : ASPxPropertyEditor
     {
         protected ASPxGridView grid;
         protected Panel containerPanel;
         private IList collectionSource;
         private bool? isEditMode = null;
         private GridViewCommandColumn commandColumn;
+        private string panelIdCache;
+        private string gridIdCache;
         
         // Dictionary to map temporary Oids (from InitNewRow) to real object Oids (after RowInserting)
         // This allows the Details button to work on newly created objects before the parent is saved
         private System.Collections.Generic.Dictionary<Guid, Guid> tempOidMapping = 
             new System.Collections.Generic.Dictionary<Guid, Guid>();
 
+        #region Events
+
         /// <summary>
         /// Fired when user clicks the "Details" button for an item
         /// </summary>
         public event EventHandler<ShowDetailRequestedEventArgs> ShowDetailRequested;
 
-        protected EditableCollectionPropertyEditorBase(Type objectType, IModelMemberViewItem model)
+        /// <summary>
+        /// Fired when initializing a new row. Allows setting default values for new items.
+        /// </summary>
+        public event EventHandler<DevExpress.Web.Data.ASPxDataInitNewRowEventArgs> InitNewRow;
+
+        /// <summary>
+        /// Fired when starting to edit a row.
+        /// </summary>
+        public event EventHandler<DevExpress.Web.Data.ASPxStartRowEditingEventArgs> StartRowEditing;
+
+        /// <summary>
+        /// Fired when canceling row editing.
+        /// </summary>
+        public event EventHandler<DevExpress.Web.Data.ASPxStartRowEditingEventArgs> CancelRowEditing;
+
+        /// <summary>
+        /// Fired after a new item has been created and added to the collection.
+        /// Allows setting additional properties or performing post-creation logic.
+        /// </summary>
+        public event EventHandler<ItemCreatedEventArgs> ItemCreated;
+
+        /// <summary>
+        /// Fired after an item has been updated.
+        /// Allows performing post-update logic or validation.
+        /// </summary>
+        public event EventHandler<ItemUpdatedEventArgs> ItemUpdated;
+
+        /// <summary>
+        /// Fired before an item is deleted. Set Cancel = true to prevent deletion.
+        /// </summary>
+        public event EventHandler<ItemDeletingEventArgs> ItemDeleting;
+
+        #endregion
+
+        public CustomASPxEditableCollectionPropertyEditor(Type objectType, IModelMemberViewItem model)
             : base(objectType, model)
         {
         }
@@ -74,7 +180,7 @@ namespace CollectionsResolution.Module.Web.Editors
                 ID = GetGridId(),
                 Width = Unit.Percentage(100),
                 AutoGenerateColumns = false,
-                EnableCallBacks = false  // Use postbacks for inline editing (like NPXMLFormatsListPropertyEditor)
+                EnableCallBacks = false  // Use postbacks for inline editing
             };
 
             // Set key field name (must be done before defining columns)
@@ -107,11 +213,10 @@ namespace CollectionsResolution.Module.Web.Editors
             // Add hidden Oid column first (required for tracking items by Oid)
             AddHiddenColumn("Oid");
 
-            // Define columns (implemented by derived classes)
+            // Define columns using automatic generation
             DefineColumns();
 
             // Add command column for CRUD operations
-            // Update/Cancel buttons appear automatically when in edit/insert mode for inline editing
             commandColumn = new GridViewCommandColumn
             {
                 ShowNewButtonInHeader = true,   // Show "New" button in header
@@ -145,16 +250,13 @@ namespace CollectionsResolution.Module.Web.Editors
             grid.RowDeleting += Grid_RowDeleting;
             grid.CustomButtonCallback += Grid_CustomButtonCallback;
 
-            // Pre-configure grid with expected data type (additional safeguard)
-            // This helps ASPxGridView know what type of objects to expect
-            // Especially important for empty collections during first load
+            // Pre-configure grid with expected data type
             if (MemberInfo != null && MemberInfo.ListElementType != null)
             {
                 grid.ForceDataRowType(MemberInfo.ListElementType);
             }
 
             // CRITICAL: Enable data security for inline editing to work
-            // These must be TRUE for the grid to render edit controls
             grid.SettingsDataSecurity.AllowInsert = true;
             grid.SettingsDataSecurity.AllowEdit = true;
             grid.SettingsDataSecurity.AllowDelete = true;
@@ -234,10 +336,6 @@ namespace CollectionsResolution.Module.Web.Editors
             // Determine if we're in edit mode based on DetailView.ViewEditMode
             bool shouldEnableEditing = false;
             
-            // In XAF, collection properties typically don't have setters, so AllowEdit on the 
-            // property editor itself will be false. We should rely on the DetailView's edit mode
-            // and the Model's AllowEdit specifically for this property if set.
-            // For now, if it's a collection, we allow editing of items if the view is in edit mode.
             if (View is DetailView detailView)
             {
                 shouldEnableEditing = detailView.ViewEditMode == ViewEditMode.Edit;
@@ -250,7 +348,7 @@ namespace CollectionsResolution.Module.Web.Editors
                 }
             }
 
-            // Only update if state changed (null != false -> true, so it will apply on first run)
+            // Only update if state changed
             if (isEditMode != shouldEnableEditing)
             {
                 isEditMode = shouldEnableEditing;
@@ -265,7 +363,6 @@ namespace CollectionsResolution.Module.Web.Editors
                 bool editMode = isEditMode.Value;
                 
                 // Enable/disable CRUD operations based on DetailView edit mode
-                // When in view mode, grid shows but editing is disabled
                 grid.SettingsDataSecurity.AllowInsert = editMode;
                 grid.SettingsDataSecurity.AllowEdit = editMode;
                 grid.SettingsDataSecurity.AllowDelete = editMode;
@@ -275,7 +372,6 @@ namespace CollectionsResolution.Module.Web.Editors
                 {
                     if (column is GridViewDataColumn dataColumn && column != commandColumn)
                     {
-                        // Columns become read-only in view mode
                         dataColumn.ReadOnly = !editMode;
                     }
                 }
@@ -285,59 +381,41 @@ namespace CollectionsResolution.Module.Web.Editors
         private void Grid_InitNewRow(object sender, DevExpress.Web.Data.ASPxDataInitNewRowEventArgs e)
         {
             // CRITICAL: Initialize a temporary Oid for the grid's state tracking
-            // The DevExpress ASPxGridView uses KeyFieldName (Oid) to track row state
-            // Without a key value in e.NewValues, the grid's state machine cannot properly
-            // identify the row as being in "insert" mode, causing cells to appear non-editable
-            // This is especially critical for the first item in an empty collection
             var tempOid = Guid.NewGuid();
             e.NewValues["Oid"] = tempOid;
             
-            // The temporary Oid will be mapped to the real object's Oid in Grid_RowInserting
-            // This allows the Details button to work on newly created objects before saving
-            
-            // Call virtual method for derived classes to set additional default values
-            // The actual object will be created in RowInserting when user clicks Update
-            OnInitNewRow(e);
+            InitNewRow?.Invoke(this, e);
         }
 
         private void Grid_StartRowEditing(object sender, DevExpress.Web.Data.ASPxStartRowEditingEventArgs e)
         {
-            // Allow editing to start
-            // The grid will automatically enter edit mode for the row
-            OnStartRowEditing(e);
+            StartRowEditing?.Invoke(this, e);
         }
 
         private void Grid_CancelRowEditing(object sender, DevExpress.Web.Data.ASPxStartRowEditingEventArgs e)
         {
-            // Cancel editing - grid will handle reverting changes
-            OnCancelRowEditing(e);
+            CancelRowEditing?.Invoke(this, e);
         }
 
         private void Grid_CustomButtonCallback(object sender, ASPxGridViewCustomButtonCallbackEventArgs e)
         {
             if (e.ButtonID == "btnDetails")
             {
-                // Only show details if the row is not currently in edit/insert mode
-                // This prevents showing detail popup while user is editing inline
                 if (!grid.IsEditing && !grid.IsNewRowEditing)
                 {
-                    // Get the Oid from the row's key value
                     var oidFromGrid = grid.GetRowValues(e.VisibleIndex, "Oid");
                     if (oidFromGrid != null && PropertyValue is IList collection)
                     {
                         Guid oidToFind = Guid.Empty;
                         
-                        // Check if this is a temporary Oid that needs to be mapped to the real object's Oid
                         if (oidFromGrid is Guid gridGuid)
                         {
                             if (tempOidMapping.ContainsKey(gridGuid))
                             {
-                                // Use the real Oid
                                 oidToFind = tempOidMapping[gridGuid];
                             }
                             else
                             {
-                                // No mapping found, use the grid Oid as-is (for already persisted objects)
                                 oidToFind = gridGuid;
                             }
                         }
@@ -360,7 +438,6 @@ namespace CollectionsResolution.Module.Web.Editors
                         
                         if (item != null)
                         {
-                            // Trigger the detail view display
                             OnShowDetailRequested(item);
                         }
                     }
@@ -372,12 +449,11 @@ namespace CollectionsResolution.Module.Web.Editors
         {
             try
             {
-                // Create new item and add to collection
                 if (PropertyValue is IList collection && MemberInfo != null)
                 {
                     var itemType = MemberInfo.ListElementType;
                     
-                    // Use ObjectSpace to create the object properly (supports XPO and Non-Persistent)
+                    // Use ObjectSpace to create the object properly
                     object newItem;
                     if (View != null && View.ObjectSpace != null)
                     {
@@ -385,15 +461,13 @@ namespace CollectionsResolution.Module.Web.Editors
                     }
                     else
                     {
-                        // Fallback
                         newItem = Activator.CreateInstance(itemType);
                     }
                     
                     // Set properties from grid's new values (skip Oid - it's auto-generated)
-                    var tempOid = e.NewValues["Oid"]; // Store temp Oid before processing
+                    var tempOid = e.NewValues["Oid"];
                     foreach (var key in e.NewValues.Keys)
                     {
-                        // Skip the Oid property - it's read-only and auto-generated
                         if (key.ToString() == "Oid")
                             continue;
                             
@@ -405,27 +479,7 @@ namespace CollectionsResolution.Module.Web.Editors
                             {
                                 try
                                 {
-                                    // Type conversion
-                                    if (propInfo.PropertyType != value.GetType())
-                                    {
-                                        if (propInfo.PropertyType.IsEnum)
-                                        {
-                                            if (int.TryParse(value.ToString(), out int enumIntValue))
-                                                value = Enum.ToObject(propInfo.PropertyType, enumIntValue);
-                                            else
-                                                value = Enum.Parse(propInfo.PropertyType, value.ToString());
-                                        }
-                                        else if (propInfo.PropertyType == typeof(bool))
-                                            value = Convert.ToBoolean(value);
-                                        else if (propInfo.PropertyType == typeof(int))
-                                            value = Convert.ToInt32(value);
-                                        else if (propInfo.PropertyType == typeof(decimal))
-                                            value = Convert.ToDecimal(value);
-                                        else if (propInfo.PropertyType == typeof(DateTime))
-                                            value = Convert.ToDateTime(value);
-                                        else
-                                            value = Convert.ChangeType(value, propInfo.PropertyType);
-                                    }
+                                    value = ConvertValue(value, propInfo.PropertyType);
                                     propInfo.SetValue(newItem, value, null);
                                 }
                                 catch
@@ -436,14 +490,11 @@ namespace CollectionsResolution.Module.Web.Editors
                         }
                     }
                     
-                    // Call virtual method for customization
-                    OnItemCreated(newItem, CurrentObject);
+                    ItemCreated?.Invoke(this, new ItemCreatedEventArgs(newItem, CurrentObject));
                     
-                    // Add to collection
                     collection.Add(newItem);
                     
-                    // Map the temporary Oid to the real object's Oid for Details button support
-                    // This allows clicking Details on a newly created object before saving the parent
+                    // Map temp Oid to real Oid for Details button support
                     if (tempOid != null)
                     {
                         var realOidProp = newItem.GetType().GetProperty("Oid");
@@ -452,27 +503,20 @@ namespace CollectionsResolution.Module.Web.Editors
                             var realOid = realOidProp.GetValue(newItem, null);
                             if (realOid != null && tempOid is Guid tempGuid && realOid is Guid realGuid)
                             {
-                                // Map temp Oid -> real Oid in our instance dictionary
                                 tempOidMapping[tempGuid] = realGuid;
                             }
                         }
                     }
                 }
                 
-                // CRITICAL: Correct sequence for manual insertion
-                // 1. Cancel default insertion
                 e.Cancel = true;
-                
-                // 2. Exit edit mode (must be called AFTER e.Cancel = true)
                 grid.CancelEdit();
-                
-                // 3. Refresh grid to show the new item
                 RefreshGrid();
             }
             catch (Exception ex)
             {
                 e.Cancel = true;
-                grid.CancelEdit(); // Exit edit mode on error too
+                grid.CancelEdit();
                 System.Diagnostics.Debug.WriteLine($"Error inserting row: {ex.Message}");
                 throw;
             }
@@ -482,7 +526,6 @@ namespace CollectionsResolution.Module.Web.Editors
         {
             try
             {
-                // Update existing item
                 if (PropertyValue is IList collection && e.Keys != null && e.Keys.Count > 0)
                 {
                     var oid = e.Keys["Oid"];
@@ -521,41 +564,9 @@ namespace CollectionsResolution.Module.Web.Editors
                                 var value = e.NewValues[key];
                                 try
                                 {
-                                    // Type conversion
-                                    if (value != null && propInfo.PropertyType != value.GetType())
+                                    if (value != null)
                                     {
-                                        if (propInfo.PropertyType.IsEnum)
-                                        {
-                                            // Try to parse enum
-                                            if (int.TryParse(value.ToString(), out int enumIntValue))
-                                            {
-                                                value = Enum.ToObject(propInfo.PropertyType, enumIntValue);
-                                            }
-                                            else
-                                            {
-                                                value = Enum.Parse(propInfo.PropertyType, value.ToString());
-                                            }
-                                        }
-                                        else if (propInfo.PropertyType == typeof(bool))
-                                        {
-                                            value = Convert.ToBoolean(value);
-                                        }
-                                        else if (propInfo.PropertyType == typeof(int))
-                                        {
-                                            value = Convert.ToInt32(value);
-                                        }
-                                        else if (propInfo.PropertyType == typeof(decimal))
-                                        {
-                                            value = Convert.ToDecimal(value);
-                                        }
-                                        else if (propInfo.PropertyType == typeof(DateTime))
-                                        {
-                                            value = Convert.ToDateTime(value);
-                                        }
-                                        else
-                                        {
-                                            value = Convert.ChangeType(value, propInfo.PropertyType);
-                                        }
+                                        value = ConvertValue(value, propInfo.PropertyType);
                                     }
                                     propInfo.SetValue(itemToUpdate, value, null);
                                 }
@@ -566,25 +577,18 @@ namespace CollectionsResolution.Module.Web.Editors
                             }
                         }
                         
-                        // Call virtual method for derived classes
-                        OnItemUpdated(itemToUpdate);
+                        ItemUpdated?.Invoke(this, new ItemUpdatedEventArgs(itemToUpdate));
                     }
                 }
                 
-                // CRITICAL: Correct sequence for manual update
-                // 1. Cancel default update
                 e.Cancel = true;
-                
-                // 2. Exit edit mode (must be called AFTER e.Cancel = true)
                 grid.CancelEdit();
-                
-                // 3. Refresh to show updated values
                 RefreshGrid();
             }
             catch (Exception ex)
             {
                 e.Cancel = true;
-                grid.CancelEdit(); // Exit edit mode on error too
+                grid.CancelEdit();
                 System.Diagnostics.Debug.WriteLine($"Error updating row: {ex.Message}");
                 throw;
             }
@@ -594,7 +598,6 @@ namespace CollectionsResolution.Module.Web.Editors
         {
             try
             {
-                // Delete item from collection
                 if (PropertyValue is IList collection && e.Keys != null && e.Keys.Count > 0)
                 {
                     var oid = e.Keys["Oid"];
@@ -620,12 +623,14 @@ namespace CollectionsResolution.Module.Web.Editors
                         }
                     }
                     
-                    if (itemToDelete != null && OnItemDeleting(itemToDelete))
+                    var deletingArgs = new ItemDeletingEventArgs(itemToDelete);
+                    ItemDeleting?.Invoke(this, deletingArgs);
+                    
+                    if (itemToDelete != null && !deletingArgs.Cancel)
                     {
                         collection.Remove(itemToDelete);
                         
-                        // For persistent objects, we must explicitly delete them using ObjectSpace
-                        // so they are marked as deleted in the database (or removed completely if aggregated).
+                        // For persistent objects, explicitly delete them using ObjectSpace
                         if (View != null && View.ObjectSpace != null)
                         {
                             View.ObjectSpace.Delete(itemToDelete);
@@ -633,8 +638,8 @@ namespace CollectionsResolution.Module.Web.Editors
                     }
                 }
                 
-                e.Cancel = true; // Prevent default deletion
-                RefreshGrid(); // Refresh to reflect deletion
+                e.Cancel = true;
+                RefreshGrid();
             }
             catch (Exception ex)
             {
@@ -653,10 +658,7 @@ namespace CollectionsResolution.Module.Web.Editors
                 {
                     var list = collectionSource.Cast<object>().ToList();
                     
-                    // CRITICAL FIX: For empty collections, inform the grid about the element type
-                    // This fixes the issue where the first item added to an empty collection
-                    // appears editable but cells are not actually editable until Update->Edit again
-                    // DevExpress ASPxGridView needs type information to create proper edit controls
+                    // For empty collections, inform the grid about the element type
                     if (list.Count == 0 && MemberInfo != null && MemberInfo.ListElementType != null)
                     {
                         grid.ForceDataRowType(MemberInfo.ListElementType);
@@ -694,62 +696,135 @@ namespace CollectionsResolution.Module.Web.Editors
             base.BreakLinksToControl(unwireEventsOnly);
         }
 
-        // Abstract and virtual methods for derived classes
+        // Virtual Methods for Extensibility (methods with actual implementation logic)
 
-        protected abstract string GetPanelId();
-        protected abstract string GetGridId();
-        protected abstract void DefineColumns();
+        /// <summary>
+        /// Gets the unique panel ID for this property editor instance.
+        /// Override to customize the panel ID generation.
+        /// </summary>
+        protected virtual string GetPanelId()
+        {
+            if (panelIdCache == null)
+            {
+                string propertyName = Model?.PropertyName ?? "Collection";
+                panelIdCache = $"CustomASPxEditableCollection_{propertyName}_Panel";
+            }
+            return panelIdCache;
+        }
+
+        /// <summary>
+        /// Gets the unique grid ID for this property editor instance.
+        /// Override to customize the grid ID generation.
+        /// </summary>
+        protected virtual string GetGridId()
+        {
+            if (gridIdCache == null)
+            {
+                string propertyName = Model?.PropertyName ?? "Collection";
+                gridIdCache = $"CustomASPxEditableCollection_{propertyName}_Grid";
+            }
+            return gridIdCache;
+        }
+
+        /// <summary>
+        /// Defines the columns to display in the grid.
+        /// Default implementation uses automatic column generation via reflection.
+        /// Override to manually define columns or customize column generation logic.
+        /// </summary>
+        protected virtual void DefineColumns()
+        {
+            // Use automatic column generation based on reflection
+            if (MemberInfo != null && MemberInfo.ListElementType != null)
+            {
+                var columnDefs = GridColumnBuilder.GetColumnDefinitions(MemberInfo.ListElementType);
+                
+                foreach (var colDef in columnDefs)
+                {
+                    AddColumnByDefinition(colDef);
+                }
+            }
+        }
         
         /// <summary>
-        /// Gets the key field name for the grid. Default is "Oid" for NonPersistentLiteObject.
-        /// Override this if your objects use a different key field.
+        /// Gets the key field name for the grid. Default is "Oid".
+        /// Override if your objects use a different key field.
         /// </summary>
         protected virtual string GetKeyFieldName()
         {
             return "Oid";
         }
 
-        protected virtual void OnInitNewRow(DevExpress.Web.Data.ASPxDataInitNewRowEventArgs e)
-        {
-            // Derived classes can override to set default values for new rows
-        }
-
-        protected virtual void OnStartRowEditing(DevExpress.Web.Data.ASPxStartRowEditingEventArgs e)
-        {
-            // Derived classes can override
-        }
-
-        protected virtual void OnCancelRowEditing(DevExpress.Web.Data.ASPxStartRowEditingEventArgs e)
-        {
-            // Derived classes can override
-        }
-
-        protected virtual void OnItemCreated(object newItem, object parentObject)
-        {
-            // Derived classes can override to set additional properties
-        }
-
-        protected virtual void OnItemUpdated(object item)
-        {
-            // Derived classes can override to handle post-update logic
-        }
-
-        protected virtual bool OnItemDeleting(object item)
-        {
-            // Derived classes can override to add validation
-            return true;
-        }
-
         /// <summary>
         /// Called when user requests to show detail view of an item.
-        /// Raises the ShowDetailRequested event.
+        /// Default implementation raises the ShowDetailRequested event.
+        /// Override to customize the detail view display behavior.
         /// </summary>
         protected virtual void OnShowDetailRequested(object item)
         {
             ShowDetailRequested?.Invoke(this, new ShowDetailRequestedEventArgs(item));
         }
 
-        // Helper methods for adding columns
+        // Private Helper Methods
+
+        /// <summary>
+        /// Adds a column to the grid based on a column definition.
+        /// </summary>
+        private void AddColumnByDefinition(ColumnDefinition colDef)
+        {
+            switch (colDef.ColumnType)
+            {
+                case ColumnType.Text:
+                    AddTextColumn(colDef.FieldName, colDef.Caption, colDef.Width, colDef.AllowEdit, colDef.Visible);
+                    break;
+                case ColumnType.Integer:
+                    AddIntColumn(colDef.FieldName, colDef.Caption, colDef.Width, colDef.AllowEdit, colDef.Visible);
+                    break;
+                case ColumnType.Decimal:
+                    AddDecimalColumn(colDef.FieldName, colDef.Caption, colDef.Width, colDef.AllowEdit, colDef.Visible, colDef.DecimalPlaces);
+                    break;
+                case ColumnType.Date:
+                    AddDateColumn(colDef.FieldName, colDef.Caption, colDef.Width, colDef.AllowEdit, colDef.Visible);
+                    break;
+                case ColumnType.CheckBox:
+                    AddCheckBoxColumn(colDef.FieldName, colDef.Caption, colDef.Width, colDef.AllowEdit, colDef.Visible);
+                    break;
+                case ColumnType.Enum:
+                    AddEnumColumn(colDef.FieldName, colDef.Caption, colDef.Width, colDef.PropertyType, colDef.AllowEdit, colDef.Visible);
+                    break;
+                default:
+                    AddTextColumn(colDef.FieldName, colDef.Caption, colDef.Width, colDef.AllowEdit, colDef.Visible);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Converts a value to the target type with support for common type conversions.
+        /// </summary>
+        private object ConvertValue(object value, Type targetType)
+        {
+            if (value.GetType() == targetType)
+                return value;
+
+            if (targetType.IsEnum)
+            {
+                if (int.TryParse(value.ToString(), out int enumIntValue))
+                    return Enum.ToObject(targetType, enumIntValue);
+                else
+                    return Enum.Parse(targetType, value.ToString());
+            }
+            else if (targetType == typeof(bool))
+                return Convert.ToBoolean(value);
+            else if (targetType == typeof(int))
+                return Convert.ToInt32(value);
+            else if (targetType == typeof(decimal))
+                return Convert.ToDecimal(value);
+            else if (targetType == typeof(DateTime))
+                return Convert.ToDateTime(value);
+            else
+                return Convert.ChangeType(value, targetType);
+        }
+
+        // Column Helper Methods
 
         protected void AddHiddenColumn(string fieldName)
         {
@@ -761,7 +836,7 @@ namespace CollectionsResolution.Module.Web.Editors
             grid.Columns.Add(column);
         }
 
-        protected void AddTextColumn(string fieldName, string caption, int width, bool allowEdit = true)
+        protected void AddTextColumn(string fieldName, string caption, int width, bool allowEdit = true, bool visible = true)
         {
             var column = new GridViewDataTextColumn
             {
@@ -769,13 +844,14 @@ namespace CollectionsResolution.Module.Web.Editors
                 Caption = caption,
                 Width = Unit.Pixel(width),
                 Settings = { AllowHeaderFilter = DefaultBoolean.False, AllowSort = DefaultBoolean.True },
-                ReadOnly = !allowEdit
+                ReadOnly = !allowEdit,
+                Visible = visible
             };
 
             grid.Columns.Add(column);
         }
 
-        protected void AddDecimalColumn(string fieldName, string caption, int width, bool allowEdit = true)
+        protected void AddDecimalColumn(string fieldName, string caption, int width, bool allowEdit = true, bool visible = true, int decimalPlaces = 2)
         {
             var column = new GridViewDataSpinEditColumn
             {
@@ -783,16 +859,17 @@ namespace CollectionsResolution.Module.Web.Editors
                 Caption = caption,
                 Width = Unit.Pixel(width),
                 Settings = { AllowHeaderFilter = DefaultBoolean.False, AllowSort = DefaultBoolean.True },
-                ReadOnly = !allowEdit
+                ReadOnly = !allowEdit,
+                Visible = visible
             };
 
             column.PropertiesSpinEdit.NumberType = DevExpress.Web.SpinEditNumberType.Float;
-            column.PropertiesSpinEdit.DecimalPlaces = 2;
+            column.PropertiesSpinEdit.DecimalPlaces = decimalPlaces;
 
             grid.Columns.Add(column);
         }
 
-        protected void AddDateColumn(string fieldName, string caption, int width, bool allowEdit = true)
+        protected void AddDateColumn(string fieldName, string caption, int width, bool allowEdit = true, bool visible = true)
         {
             var column = new GridViewDataDateColumn
             {
@@ -800,7 +877,8 @@ namespace CollectionsResolution.Module.Web.Editors
                 Caption = caption,
                 Width = Unit.Pixel(width),
                 Settings = { AllowHeaderFilter = DefaultBoolean.False, AllowSort = DefaultBoolean.True },
-                ReadOnly = !allowEdit
+                ReadOnly = !allowEdit,
+                Visible = visible
             };
 
             column.PropertiesDateEdit.DisplayFormatString = "d";
@@ -808,7 +886,7 @@ namespace CollectionsResolution.Module.Web.Editors
             grid.Columns.Add(column);
         }
 
-        protected void AddIntColumn(string fieldName, string caption, int width, bool allowEdit = true)
+        protected void AddIntColumn(string fieldName, string caption, int width, bool allowEdit = true, bool visible = true)
         {
             var column = new GridViewDataSpinEditColumn
             {
@@ -816,7 +894,8 @@ namespace CollectionsResolution.Module.Web.Editors
                 Caption = caption,
                 Width = Unit.Pixel(width),
                 Settings = { AllowHeaderFilter = DefaultBoolean.False, AllowSort = DefaultBoolean.True },
-                ReadOnly = !allowEdit
+                ReadOnly = !allowEdit,
+                Visible = visible
             };
 
             column.PropertiesSpinEdit.NumberType = DevExpress.Web.SpinEditNumberType.Integer;
@@ -824,7 +903,7 @@ namespace CollectionsResolution.Module.Web.Editors
             grid.Columns.Add(column);
         }
 
-        protected void AddCheckBoxColumn(string fieldName, string caption, int width, bool allowEdit = true)
+        protected void AddCheckBoxColumn(string fieldName, string caption, int width, bool allowEdit = true, bool visible = true)
         {
             var column = new GridViewDataCheckColumn
             {
@@ -832,13 +911,14 @@ namespace CollectionsResolution.Module.Web.Editors
                 Caption = caption,
                 Width = Unit.Pixel(width),
                 Settings = { AllowHeaderFilter = DefaultBoolean.False, AllowSort = DefaultBoolean.True },
-                ReadOnly = !allowEdit
+                ReadOnly = !allowEdit,
+                Visible = visible
             };
 
             grid.Columns.Add(column);
         }
 
-        protected void AddComboBoxColumn(string fieldName, string caption, int width, object dataSource, string valueField, string textField, bool allowEdit = true)
+        protected void AddComboBoxColumn(string fieldName, string caption, int width, object dataSource, string valueField, string textField, bool allowEdit = true, bool visible = true)
         {
             var column = new GridViewDataComboBoxColumn
             {
@@ -846,12 +926,44 @@ namespace CollectionsResolution.Module.Web.Editors
                 Caption = caption,
                 Width = Unit.Pixel(width),
                 Settings = { AllowHeaderFilter = DefaultBoolean.False, AllowSort = DefaultBoolean.True },
-                ReadOnly = !allowEdit
+                ReadOnly = !allowEdit,
+                Visible = visible
             };
 
             column.PropertiesComboBox.DataSource = dataSource;
             column.PropertiesComboBox.ValueField = valueField;
             column.PropertiesComboBox.TextField = textField;
+
+            grid.Columns.Add(column);
+        }
+
+        protected void AddEnumColumn(string fieldName, string caption, int width, Type enumType, bool allowEdit = true, bool visible = true)
+        {
+            var column = new GridViewDataComboBoxColumn
+            {
+                FieldName = fieldName,
+                Caption = caption,
+                Width = Unit.Pixel(width),
+                Settings = { AllowHeaderFilter = DefaultBoolean.False, AllowSort = DefaultBoolean.True },
+                ReadOnly = !allowEdit,
+                Visible = visible
+            };
+
+            // Populate with enum values
+            if (enumType != null && enumType.IsEnum)
+            {
+                var enumValues = Enum.GetValues(enumType);
+                var enumList = new System.Collections.Generic.List<object>();
+                
+                foreach (var enumValue in enumValues)
+                {
+                    enumList.Add(new { Value = enumValue, Text = enumValue.ToString() });
+                }
+                
+                column.PropertiesComboBox.DataSource = enumList;
+                column.PropertiesComboBox.ValueField = "Value";
+                column.PropertiesComboBox.TextField = "Text";
+            }
 
             grid.Columns.Add(column);
         }
