@@ -8,9 +8,9 @@ namespace CollectionsResolution.Module.BusinessObjects.CollectionRendering
     /// <summary>
     /// Represents a persistent detail item in a secondary collection for testing collection rendering in XAF.
     /// </summary>
-    public class DetailItemPersistent : BaseObject
+    public class DetailItemPersistentDefault : BaseObject
     {
-        public DetailItemPersistent(Session session) : base(session) { }
+        public DetailItemPersistentDefault(Session session) : base(session) { }
 
         private string _description;
         /// <summary>

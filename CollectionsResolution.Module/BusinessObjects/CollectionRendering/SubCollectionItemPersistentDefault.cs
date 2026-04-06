@@ -8,9 +8,9 @@ namespace CollectionsResolution.Module.BusinessObjects.CollectionRendering
     /// Represents a persistent sub-collection item to demonstrate nested collection rendering in XAF.
     /// This object contains primitive types (Int, String, Bool) to test sub-collection rendering.
     /// </summary>
-    public class SubCollectionItemPersistent : BaseObject
+    public class SubCollectionItemPersistentDefault : BaseObject
     {
-        public SubCollectionItemPersistent(Session session) : base(session) { }
+        public SubCollectionItemPersistentDefault(Session session) : base(session) { }
 
         private string _identifier;
         /// <summary>
@@ -42,12 +42,12 @@ namespace CollectionsResolution.Module.BusinessObjects.CollectionRendering
             set => SetPropertyValue(nameof(IsEnabled), ref _isEnabled, value);
         }
 
-        private CollectionItemPersistent _collectionItem;
+        private CollectionItemPersistentDefault _collectionItem;
         /// <summary>
         /// Gets or sets the parent collection item.
         /// </summary>
-        [Association("CollectionItemPersistent-SubItems")]
-        public CollectionItemPersistent CollectionItem
+        [Association("CollectionItemPersistentDefault-SubItems")]
+        public CollectionItemPersistentDefault CollectionItem
         {
             get => _collectionItem;
             set => SetPropertyValue(nameof(CollectionItem), ref _collectionItem, value);

@@ -84,13 +84,13 @@ namespace CollectionsResolution.Module.BusinessObjects.CollectionRendering
         /// </summary>
         [Association("CollectionRenderingPersistentDefault-CollectionItems")]
         [Aggregated]
-        public XPCollection<CollectionItemPersistent> CollectionItems => GetCollection<CollectionItemPersistent>(nameof(CollectionItems));
+        public XPCollection<CollectionItemPersistentDefault> CollectionItems => GetCollection<CollectionItemPersistentDefault>(nameof(CollectionItems));
 
         /// <summary>
         /// Gets the second collection of detail items.
         /// </summary>
         [Association("CollectionRenderingPersistentDefault-DetailItems")]
         [Aggregated]
-        public XPCollection<DetailItemPersistent> DetailItems => GetCollection<DetailItemPersistent>(nameof(DetailItems));
+        public XPCollection<DetailItemPersistentDefault> DetailItems => GetCollection<DetailItemPersistentDefault>(nameof(DetailItems));
     }
 }

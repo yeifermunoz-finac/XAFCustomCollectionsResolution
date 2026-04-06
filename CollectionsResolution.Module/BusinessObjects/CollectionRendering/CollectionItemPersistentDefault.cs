@@ -8,9 +8,9 @@ namespace CollectionsResolution.Module.BusinessObjects.CollectionRendering
     /// Represents a persistent item in a collection for testing collection rendering in XAF.
     /// This object demonstrates how sub-collections are rendered.
     /// </summary>
-    public class CollectionItemPersistent : BaseObject
+    public class CollectionItemPersistentDefault : BaseObject
     {
-        public CollectionItemPersistent(Session session) : base(session) { }
+        public CollectionItemPersistentDefault(Session session) : base(session) { }
 
         private string _code;
         /// <summary>
@@ -68,8 +68,8 @@ namespace CollectionsResolution.Module.BusinessObjects.CollectionRendering
         /// Gets the sub-collection of items to demonstrate nested collection rendering.
         /// </summary>
         [Aggregated]
-        [Association("CollectionItemPersistent-SubItems")]
-        public XPCollection<SubCollectionItemPersistent> SubItems => GetCollection<SubCollectionItemPersistent>(nameof(SubItems));
+        [Association("CollectionItemPersistentDefault-SubItems")]
+        public XPCollection<SubCollectionItemPersistentDefault> SubItems => GetCollection<SubCollectionItemPersistentDefault>(nameof(SubItems));
 
         private CollectionRenderingPersistentDefault _collectionRendering;
         /// <summary>

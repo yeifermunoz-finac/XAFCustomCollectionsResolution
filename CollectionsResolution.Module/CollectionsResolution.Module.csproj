@@ -90,13 +90,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\GridColumnDefinitionAttribute.cs" />
-    <Compile Include="BusinessObjects\CollectionRendering\CollectionItemPersistent.cs" />
+    <Compile Include="BusinessObjects\CollectionRendering\CollectionItemPersistentDefault.cs" />
     <Compile Include="BusinessObjects\CollectionRendering\CollectionItemPersistentCustom.cs" />
     <Compile Include="BusinessObjects\CollectionRendering\CollectionRenderingPersistentCustom.cs" />
     <Compile Include="BusinessObjects\CollectionRendering\CollectionRenderingPersistentDefault.cs" />
-    <Compile Include="BusinessObjects\CollectionRendering\DetailItemPersistent.cs" />
+    <Compile Include="BusinessObjects\CollectionRendering\DetailItemPersistentDefault.cs" />
     <Compile Include="BusinessObjects\CollectionRendering\DetailItemPersistentCustom.cs" />
-    <Compile Include="BusinessObjects\CollectionRendering\SubCollectionItemPersistent.cs" />
+    <Compile Include="BusinessObjects\CollectionRendering\SubCollectionItemPersistentDefault.cs" />
     <Compile Include="BusinessObjects\CollectionRendering\SubCollectionItemPersistentCustom.cs" />
     <Compile Include="DatabaseUpdate\Updater.cs" />
     <Compile Include="Module.cs">
@@ -151,7 +151,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="24.2.11">
       <PrivateAssets>all</PrivateAssets>
